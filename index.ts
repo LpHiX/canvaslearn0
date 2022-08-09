@@ -2,7 +2,26 @@ const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 const context = canvas.getContext("2d") as CanvasRenderingContext2D;
 const fpsMeter = document.getElementById("fpsMeter") as HTMLDivElement;
 const debugText = document.getElementById("debugText") as HTMLDivElement;
- 
+
+const squareLookup = [
+    [],
+    [0,1],
+    [0,2],
+    [1,2],
+    [1,3],
+    [0,3],
+    [4],
+    [2,3],
+    [2,3],
+    [5],
+    [0,3],
+    [1,3],
+    [1,2],
+    [0,2],
+    [0,1],
+    []
+];
+
 class Vec2{
     x: number;
     y: number;
@@ -37,6 +56,18 @@ class Grid{
         var x = coord.x * 2 - canvas.width;
         var y = coord.y * 2 - canvas.height;
         return new Vec2(x,-y).mul(this.size / this.canvasMin);
+    }
+    gridToCanvasX(x: number): number{
+        return canvas.width / 2 + x / this.size * this.canvasMin / 2;
+    }
+    gridToCanvasY(y: number): number{
+        return canvas.height / 2 - y / this.size * this.canvasMin / 2;
+    }
+    moveTo(gridCoord: Vec2): void{
+        context.moveTo(this.gridToCanvasX(gridCoord.x), this.gridToCanvasY(gridCoord.y));
+    }
+    lineTo(gridCoord: Vec2): void{
+        context.lineTo(this.gridToCanvasX(gridCoord.x), this.gridToCanvasY(gridCoord.y));
     }
     drawMinorGrid(gridSize:number) {
         context.strokeStyle = "rgb(50, 100, 200)";
@@ -80,7 +111,7 @@ class Grid{
     }
 }
 function funcValue(x: number, y: number):number{
-    return (y - x * x / 2) + 15;
+    return y - x * x / 2 + 5 + x * x * x * x / 200;
 }
  
 class SubGrid{
@@ -100,11 +131,41 @@ class SubGrid{
     showValue(x:number,y:number): void{
         let val = funcValue(x,y);
         let coord = grid.gridToCanvas(new Vec2(x,y));
-        context.strokeStyle = `rgb(0, ${val >= 0 ? 255 : 0}, 0)`
+        context.strokeStyle = `rgb(0, 0, ${val >= 0 ? 255 :  0})`
         context.beginPath();
         context.arc(coord.x, coord.y, 3, 0, 2 * Math.PI);
         context.stroke();
     }
+    marchingSquares(x:number, y:number): void{
+        var squareIndex = 0;
+        let thresh = 0;
+        
+        let lineLookup = [
+            new Vec2(x + subGrid.gridSize/2, y),
+            new Vec2(x, y + subGrid.gridSize/2),
+            new Vec2(x + subGrid.gridSize, y + subGrid.gridSize/2),
+            new Vec2(x + subGrid.gridSize/2, y + subGrid.gridSize),
+        ]
+
+        if(funcValue(x,y) >= thresh){squareIndex += 1;}
+        if(funcValue(x + subGrid.gridSize,y) >= thresh){squareIndex += 2;}
+        if(funcValue(x,y + subGrid.gridSize) >= thresh){squareIndex += 4;}
+        if(funcValue(x + subGrid.gridSize,y + subGrid.gridSize) >= thresh){squareIndex += 8;}
+        switch (squareLookup[squareIndex].length) {
+            case 1:
+                break;
+            case 2:
+                context.strokeStyle = `rgb(0, 255, 0)`;
+                context.beginPath();
+                grid.moveTo(lineLookup[squareLookup[squareIndex][0]]);
+                grid.lineTo(lineLookup[squareLookup[squareIndex][1]]);
+                context.stroke();
+                break;
+            default:
+                break;
+        }
+    }
+    
 }
 function canvasClick(event: MouseEvent): void {
     const rect = canvas.getBoundingClientRect();
@@ -123,7 +184,7 @@ var lastFrameTime: number, grid: Grid, subGrid:SubGrid;
  
 function setup(){
     grid = new Grid(10);
-    subGrid = new SubGrid(1);
+    subGrid = new SubGrid(0.4);
     canvas.addEventListener("mousedown", canvasClick);
  
     context.fillStyle = "rgb(30,40,50)";
@@ -131,7 +192,8 @@ function setup(){
     grid.drawMajorGrid();
     grid.drawMinorGrid(2);
  
-    subGrid.forEachCorner(subGrid.showValue)
+    subGrid.forEachCorner(subGrid.showValue);
+    subGrid.forEachCorner(subGrid.marchingSquares);
 }
 function frameUpdate(timestamp: number){
     fpsMeter.innerText = (1 / ((timestamp - lastFrameTime) / 1000)).toString();
