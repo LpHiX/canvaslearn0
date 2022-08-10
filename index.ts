@@ -39,13 +39,42 @@ class Vec2{
     toString():string{
         return `vec2(${this.x}, ${this.y})`;
     }
+    static randomVec(minX:number, minY:number, maxX:number, maxY:number):Vec2{
+        return new Vec2(Math.random() * (maxX - minX) + minX, Math.random() * (maxY - minY) + minY);
+    }
+}
+class Circle{
+    constructor(
+        public pos:Vec2,
+        public vel:Vec2,
+        public radius:number
+    ){}
+    anim(): void{
+        if(this.pos.x - this.radius < -grid.xLim || this.pos.x + this.radius> grid.xLim){
+            this.vel.x *= -1;
+        }
+        if(this.pos.y - this.radius < -grid.yLim || this.pos.y + this.radius> grid.yLim){
+            this.vel.y *= -1;
+        }
+        this.pos = this.pos.add(this.vel);
+    }
+    draw(): void{
+        context.strokeStyle = 'rgb(255, 0, 0)';
+        context.beginPath();
+        context.arc(grid.gridToCanvasX(this.pos.x), grid.gridToCanvasY(this.pos.y), this.radius * grid.canvasMin / grid.size / 2, 0, 2 * Math.PI);
+        context.stroke();
+    }
 }
 class Grid{
     size: number;
     canvasMin: number;
+    xLim: number;
+    yLim: number;
     constructor(size:number){
         this.size = size;
         this.canvasMin = Math.min(canvas.width, canvas.height);
+        this.xLim = this.size * canvas.width / this.canvasMin;
+        this.yLim = this.size * canvas.height / this.canvasMin;
     }
     gridToCanvas(coord: Vec2): Vec2{
         let x = canvas.width / 2 + coord.x / this.size * this.canvasMin / 2;
@@ -111,9 +140,21 @@ class Grid{
     }
 }
 function funcValue(x: number, y: number):number{
-    return y - x * x / 2 + 5 + x * x * x * x / 200;
+    //return (x * x + y * y - 10) % 15 - 5;
+    //return (y - x * x / 1)
+    //return y - x * x / 2 - 2 + x * x * x * x / 150 + Math.exp(-y/3) - 5 * Math.sin(5 *x);
+    let val = -1;
+    circles.forEach(circle => {
+        val += circle.radius / Math.sqrt((x - circle.pos.x) * (x - circle.pos.x) + (y -circle.pos.y) * (y - circle.pos.y));
+    });
+    return val;
 }
- 
+function lerpNum(alpha:number, a:number, b:number):number{
+    return a + (b - a) * 0.5;
+}
+function lerpVec(alpha:number, a:Vec2, b:Vec2):Vec2{
+    return a.add(b.add(a.mul(-1)).mul(alpha));
+}
 class SubGrid{
     gridSize:number;
     constructor(gridSize: number){
@@ -131,30 +172,34 @@ class SubGrid{
     showValue(x:number,y:number): void{
         let val = funcValue(x,y);
         let coord = grid.gridToCanvas(new Vec2(x,y));
-        context.strokeStyle = `rgb(0, 0, ${val >= 0 ? 255 :  0})`
+        context.strokeStyle = `rgb(0, 0, ${val >= thresh ? 255 :  0})`
         context.beginPath();
         context.arc(coord.x, coord.y, 3, 0, 2 * Math.PI);
         context.stroke();
     }
     marchingSquares(x:number, y:number): void{
         var squareIndex = 0;
-        let thresh = 0;
-        
-        let lineLookup = [
-            new Vec2(x + subGrid.gridSize/2, y),
-            new Vec2(x, y + subGrid.gridSize/2),
-            new Vec2(x + subGrid.gridSize, y + subGrid.gridSize/2),
-            new Vec2(x + subGrid.gridSize/2, y + subGrid.gridSize),
-        ]
+                
+        let corner0 = funcValue(x,y);
+        let corner1 = funcValue(x + this.gridSize,y);
+        let corner2 = funcValue(x,y + this.gridSize);
+        let corner3 = funcValue(x + this.gridSize,y + this.gridSize);
 
-        if(funcValue(x,y) >= thresh){squareIndex += 1;}
-        if(funcValue(x + subGrid.gridSize,y) >= thresh){squareIndex += 2;}
-        if(funcValue(x,y + subGrid.gridSize) >= thresh){squareIndex += 4;}
-        if(funcValue(x + subGrid.gridSize,y + subGrid.gridSize) >= thresh){squareIndex += 8;}
+        if(corner0 >= thresh){squareIndex += 1;}
+        if(corner1 >= thresh){squareIndex += 2;}
+        if(corner2 >= thresh){squareIndex += 4;}
+        if(corner3 >= thresh){squareIndex += 8;}
         switch (squareLookup[squareIndex].length) {
             case 1:
                 break;
             case 2:
+                let lineLookup = [
+                    lerpVec(-corner0 / (-corner0 + corner1), new Vec2(x, y), new Vec2(x + this.gridSize, y)),
+                    lerpVec(-corner0 / (-corner0 + corner2), new Vec2(x, y), new Vec2(x, y + this.gridSize)),
+                    lerpVec(-corner1 / (-corner1 + corner3), new Vec2(x + this.gridSize, y), new Vec2(x + this.gridSize, y + this.gridSize)),
+                    lerpVec(-corner2 / (-corner2 + corner3), new Vec2(x, y + this.gridSize), new Vec2(x + this.gridSize, y + this.gridSize))
+                ]
+                
                 context.strokeStyle = `rgb(0, 255, 0)`;
                 context.beginPath();
                 grid.moveTo(lineLookup[squareLookup[squareIndex][0]]);
@@ -180,25 +225,35 @@ function canvasClick(event: MouseEvent): void {
     `;
 }
  
-var lastFrameTime: number, grid: Grid, subGrid:SubGrid;
+var lastFrameTime: number, grid: Grid, subGrid:SubGrid, subGrid2:SubGrid;
+var circles: Circle[] = [];
+const thresh = 0;
  
 function setup(){
-    grid = new Grid(10);
-    subGrid = new SubGrid(0.4);
+    grid = new Grid(20);
+    subGrid = new SubGrid(0.5);
     canvas.addEventListener("mousedown", canvasClick);
- 
-    context.fillStyle = "rgb(30,40,50)";
-    context.fillRect(0, 0, canvas.width, canvas.height);
-    grid.drawMajorGrid();
-    grid.drawMinorGrid(2);
- 
-    subGrid.forEachCorner(subGrid.showValue);
-    subGrid.forEachCorner(subGrid.marchingSquares);
+    for(let i = 0; i < 10; i++){
+        circles.push(new Circle(Vec2.randomVec(-15, -15, 15, 15), Vec2.randomVec(-0.1, -.1, .1, .1).mul(1), 1))
+    }
 }
 function frameUpdate(timestamp: number){
     fpsMeter.innerText = (1 / ((timestamp - lastFrameTime) / 1000)).toString();
     lastFrameTime = timestamp;
  
+    context.fillStyle = "rgb(30,40,50)";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    grid.drawMajorGrid();
+    grid.drawMinorGrid(0.5);
+
+    //subGrid.forEachCorner(subGrid.showValue.bind(subGrid));
+    subGrid.forEachCorner(subGrid.marchingSquares.bind(subGrid));
+
+    circles.forEach(element => {
+        element.anim();
+        //element.draw();
+    });
+
     window.requestAnimationFrame(frameUpdate);
 }
 setup();
