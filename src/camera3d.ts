@@ -28,11 +28,11 @@ class Vec3{
 class Camera{
     constructor(
         public pos:Vec3,
-        public angleZ: number,
+        public angleY: number,
         public angleX: number
     ){}
 }
-class UV{
+class Util{
     canvasMin:number;
     constructor(
         public size:number
@@ -46,38 +46,70 @@ class UV{
         return new Vec3(canvas.width / 2 + coord.x / this.size * canvas.width / 2, canvas.height / 2 - coord.y / this.size * canvas.height / 2, 0)
     }
     vecToGrid(coord: Vec3):Vec2{
-        return new Vec2(coord.x / coord.z, coord.y / coord.z);
+        return new Vec2(coord.x / (coord.z), coord.y / (coord.z));
+    }
+    rotZ(coord:Vec3, angle:number):Vec3{
+        return new Vec3(coord.x * Math.cos(angle) - coord.y * Math.sin(angle), coord.x * Math.sin(angle) + coord.y * Math.cos(angle), coord.z);
+    }
+    rotX(coord:Vec3, angle:number):Vec3{
+        return new Vec3(coord.x, coord.y * Math.cos(angle) - coord.z * Math.sin(angle), coord.y * Math.sin(angle) + coord.z * Math.cos(angle));
+    }
+    rotY(coord:Vec3, angle:number):Vec3{
+        return new Vec3(coord.x * Math.cos(angle) - coord.z * Math.sin(angle), coord.y, coord.x * Math.sin(angle) + coord.z * Math.cos(angle));
     }
 }
+let down = false;
+let startX = 0;
+let startY = 0;
+let premoveY = 0;
+let premoveX = 0;
 const cube=[
-    new Vec3(1, 1, 5),
-    new Vec3(3, 1, 5),
-    new Vec3(3, 3, 5),
-    new Vec3(1, 3, 5),
-    new Vec3(1, 1, 7),
-    new Vec3(3, 1, 7),
-    new Vec3(3, 3, 7),
-    new Vec3(1, 3, 7)
+    new Vec3(-1, -1, 5),
+    new Vec3( 1, -1, 5),
+    new Vec3( 1,  1, 5),
+    new Vec3( -1, 1, 5),
+    new Vec3(-1, -1, 3),
+    new Vec3( 1, -1, 3),
+    new Vec3( 1,  1, 3),
+    new Vec3( -1, 1, 3)
 ];
-const uv = new UV(4);
-
+const util = new Util(4);
+const cam = new Camera(new Vec3(0,0,-10), 0, 0);
 function setup(){
-    ctx.fillStyle = "rgb(30, 40, 50)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
+    canvas.addEventListener("mousedown", function(event) {
+        down = true;
+        premoveX = cam.angleX;
+        premoveY = cam.angleY;
+        startX = event.clientX;
+        startY = event.clientY;
+    });
+    canvas.addEventListener("mouseup", () => {
+        down = false;
+        premoveX = cam.angleX;
+        premoveY = cam.angleY;
+    });
+    canvas.addEventListener("mousemove", function(event) {
+        if(down){
+            cam.angleY = premoveY + (event.clientX - startX) / 100;
+            cam.angleX = premoveX + (event.clientY - startY) / 100;
+        }
+    });
 }
 function frameUpdate(timestamp:number){
+    ctx.fillStyle = "rgb(30, 40, 50)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
     ctx.strokeStyle = "rgb(0, 255, 100)";
     cube.forEach(point =>{
-        const tempPoint = new Vec3(point.x + 4 * Math.cos(timestamp/10), point.y, point.z + 4 * Math.sin(timestamp/10));
+        const tempPoint = util.rotX(util.rotY(point, cam.angleY), cam.angleX);
         ctx.beginPath();
-        const point2d = uv.g2c(uv.vecToGrid(tempPoint));
+        const point2d = util.g2c(util.vecToGrid(tempPoint));
         ctx.arc(point2d.x, point2d.y, 1, 0, Math.PI * 2)
         ctx.stroke()
     });
 
     ctx.beginPath();
-    const zero = uv.g2c(new Vec3(0,0,0));
+    const zero = util.g2c(new Vec3(0,0,0));
     ctx.arc(zero.x, zero.y, 1, 0, Math.PI * 2)
     ctx.stroke()
 
