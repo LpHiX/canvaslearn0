@@ -1,5 +1,7 @@
-const canvas = document.getElementById("canvas2") as HTMLCanvasElement;
+namespace perlin{
+const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+const debugText = document.getElementById("debugText") as HTMLDivElement;
 
 class Vec2{
     constructor(
@@ -49,22 +51,36 @@ class PerlinLayer{
         return lerp(fracVec.y, x0, x1);
     }
 }
-
+var layers: PerlinLayer[] = [];
 
 function setup(){
     var id = ctx.createImageData(canvas.width, canvas.height);
     var d = id.data;
     var layer0 = new PerlinLayer(4);
+    var max = -10;
+    var min = 10;
     for(var x = 0; x < canvas.width; x++){
         for(var y = 0; y < canvas.height; y++){
+            const val = layer0.value(x,y);
+            if(val < min){
+                min = val;
+            }
+            if(val > max){
+                max = val;
+            }
             d[(y * canvas.width + x) * 4] = 0;
-            d[(y * canvas.width + x) * 4 + 1] = layer0.value(x,y) * 255;
+            d[(y * canvas.width + x) * 4 + 1] = val * 255;
             d[(y * canvas.width + x) * 4 + 2] = 0;
             d[(y * canvas.width + x) * 4 + 3] = 255;
         }
     }
+    debugText.innerText = `
+    max = ${max}
+    min = ${min}
+    `
     ctx.putImageData(id, 0, 0);
     ctx.fillStyle = "rgb(20, 40, 50)";
     ctx.fillRect(0, 0, 20, 30);
 }
 setup();
+}
