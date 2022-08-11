@@ -29,7 +29,8 @@ function lerp(w:number, a:number, b:number): number {
 class PerlinLayer{
     corners: Vec2[][] = [];
     constructor(
-        public size:number
+        public size:number,
+        public magnitude:number
     ){
         for(var x = 0; x <= size; x++){
             this.corners.push([]);
@@ -48,7 +49,7 @@ class PerlinLayer{
         var dot3 = new Vec2(fracVec.x - 1, fracVec.y - 1).dot(this.corners[indexVec.x + 1][indexVec.y + 1]);
         var x0 = lerp(fracVec.x, dot0, dot1);
         var x1 = lerp(fracVec.x, dot2, dot3);
-        return lerp(fracVec.y, x0, x1);
+        return lerp(fracVec.y, x0, x1) * this.magnitude;
     }
 }
 var layers: PerlinLayer[] = [];
@@ -56,31 +57,42 @@ var layers: PerlinLayer[] = [];
 function setup(){
     var id = ctx.createImageData(canvas.width, canvas.height);
     var d = id.data;
-    var layer0 = new PerlinLayer(4);
-    var max = -10;
-    var min = 10;
+    layers.push(new PerlinLayer(4, 1))
+    layers.push(new PerlinLayer(10, 1))
+    layers.push(new PerlinLayer(10, 0.4))
+    layers.push(new PerlinLayer(16, 0.2))
+    layers.push(new PerlinLayer(32, 0.1))
+    var min = Infinity;
+    var max = -Infinity;
+    var buffer: number[][] = [];
     for(var x = 0; x < canvas.width; x++){
+        buffer.push([]);
         for(var y = 0; y < canvas.height; y++){
-            const val = layer0.value(x,y);
+            var val = 0;
+            layers.forEach(element => {
+                val += element.value(x,y);
+            });
+            buffer[x].push(val);
             if(val < min){
                 min = val;
             }
             if(val > max){
                 max = val;
             }
+        }
+    }
+    for(var x = 0; x < canvas.width; x++){
+        for(var y = 0; y < canvas.height; y++){
             d[(y * canvas.width + x) * 4] = 0;
-            d[(y * canvas.width + x) * 4 + 1] = val * 255;
+            d[(y * canvas.width + x) * 4 + 1] = (buffer[x][y] - min) / (max - min) * 255
             d[(y * canvas.width + x) * 4 + 2] = 0;
             d[(y * canvas.width + x) * 4 + 3] = 255;
         }
     }
-    debugText.innerText = `
-    max = ${max}
-    min = ${min}
-    `
     ctx.putImageData(id, 0, 0);
-    ctx.fillStyle = "rgb(20, 40, 50)";
-    ctx.fillRect(0, 0, 20, 30);
+    debugText.innerText = 
+    `max = ${max}
+    min = ${min}`
 }
 setup();
 }

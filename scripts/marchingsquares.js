@@ -222,7 +222,7 @@ var marchingsquares;
     const thresh = 0;
     function setup() {
         grid = new Grid(20);
-        subGrid = new SubGrid(0.5);
+        subGrid = new SubGrid(1);
         canvas.addEventListener("mousedown", canvasClick);
         for (let i = 0; i < 10; i++) {
             circles.push(new Circle(Vec2.randomVec(-15, -15, 15, 15), Vec2.randomVec(-0.1, -.1, .1, .1).mul(1), 1));
