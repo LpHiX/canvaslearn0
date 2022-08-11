@@ -87,10 +87,28 @@ var camera3d;
             premoveX = cam.angleX;
             premoveY = cam.angleY;
         });
+        canvas.addEventListener("touchstart", function (event) {
+            down = true;
+            premoveX = cam.angleX;
+            premoveY = cam.angleY;
+            startX = event.touches[0].clientX;
+            startY = event.touches[0].clientY;
+        });
+        canvas.addEventListener("touchend", () => {
+            down = false;
+            premoveX = cam.angleX;
+            premoveY = cam.angleY;
+        });
         canvas.addEventListener("mousemove", function (event) {
             if (down) {
                 cam.angleY = premoveY + (event.clientX - startX) / 100;
                 cam.angleX = premoveX + (event.clientY - startY) / 100;
+            }
+        });
+        canvas.addEventListener("touchmove", function (event) {
+            if (down) {
+                cam.angleY = premoveY + (event.touches[0].clientX - startX) / 100;
+                cam.angleX = premoveX + (event.touches[0].clientY - startY) / 100;
             }
         });
     }
