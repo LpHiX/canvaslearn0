@@ -56,6 +56,9 @@ var camera3d;
         rotY(coord, angle) {
             return new Vec3(coord.x * Math.cos(angle) - coord.z * Math.sin(angle), coord.y, coord.x * Math.sin(angle) + coord.z * Math.cos(angle));
         }
+        vecToCanvas(coord) {
+            return this.g2c(this.vecToGrid(util.rotX(util.rotY(coord, cam.angleY), cam.angleX)));
+        }
     }
     let down = false;
     let startX = 0;
@@ -63,18 +66,33 @@ var camera3d;
     let premoveY = 0;
     let premoveX = 0;
     const cube = [
-        new Vec3(-1, -1, 5),
-        new Vec3(1, -1, 5),
-        new Vec3(1, 1, 5),
-        new Vec3(-1, 1, 5),
-        new Vec3(-1, -1, 3),
-        new Vec3(1, -1, 3),
-        new Vec3(1, 1, 3),
-        new Vec3(-1, 1, 3)
+        new Vec3(-1 + 3, -1 + 3, 5),
+        new Vec3(1 + 3, -1 + 3, 5),
+        new Vec3(1 + 3, 1 + 3, 5),
+        new Vec3(-1 + 3, 1 + 3, 5),
+        new Vec3(-1 + 3, -1 + 3, 3),
+        new Vec3(1 + 3, -1 + 3, 3),
+        new Vec3(1 + 3, 1 + 3, 3),
+        new Vec3(-1 + 3, 1 + 3, 3)
+    ];
+    const indicies = [
+        0, 1, 2,
+        0, 3, 2,
+        0, 1, 5,
+        0, 4, 5,
+        0, 3, 7,
+        0, 4, 7,
+        2, 3, 7,
+        2, 6, 7,
+        1, 2, 6,
+        1, 5, 6,
+        4, 5, 6,
+        4, 7, 6
     ];
     const util = new Util(4);
     const cam = new Camera(new Vec3(0, 0, -10), 0, 0);
     function setup() {
+        ctx.font = "10px Arial";
         canvas.addEventListener("mousedown", function (event) {
             down = true;
             premoveX = cam.angleX;
@@ -115,14 +133,31 @@ var camera3d;
     function frameUpdate(timestamp) {
         ctx.fillStyle = "rgb(30, 40, 50)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = "rgb(0, 255, 255)";
+        ctx.fillStyle = "rgba(0, 255 , 0, 50)";
+        for (var i = 0; i < indicies.length / 3; i++) {
+            ctx.beginPath();
+            const corner0 = util.vecToCanvas(cube[indicies[i * 3]]);
+            const corner1 = util.vecToCanvas(cube[indicies[i * 3 + 1]]);
+            const corner2 = util.vecToCanvas(cube[indicies[i * 3 + 2]]);
+            ctx.moveTo(corner0.x, corner0.y);
+            ctx.lineTo(corner1.x, corner1.y);
+            ctx.lineTo(corner2.x, corner2.y);
+            ctx.closePath();
+            ctx.stroke();
+            ctx.fill();
+        }
         ctx.strokeStyle = "rgb(0, 255, 100)";
-        cube.forEach(point => {
-            const tempPoint = util.rotX(util.rotY(point, cam.angleY), cam.angleX);
+        ctx.fillStyle = "rgb(255, 255 ,255)";
+        ctx.lineWidth = 1;
+        for (var i = 0; i < cube.length; i++) {
+            const tempPoint = util.rotX(util.rotY(cube[i], cam.angleY), cam.angleX);
             ctx.beginPath();
             const point2d = util.g2c(util.vecToGrid(tempPoint));
             ctx.arc(point2d.x, point2d.y, 1, 0, Math.PI * 2);
             ctx.stroke();
-        });
+            ctx.fillText(i.toString(), point2d.x, point2d.y);
+        }
         ctx.beginPath();
         const zero = util.g2c(new Vec3(0, 0, 0));
         ctx.arc(zero.x, zero.y, 1, 0, Math.PI * 2);
