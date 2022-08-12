@@ -21,8 +21,14 @@ class Vec3{
        public y: number,
        public z: number,
     ){}
+    add(other: Vec3): Vec3{
+        return new Vec3(this.x + other.x, this.y + other.y, this.z + other.z);
+    }
     mul(scalar:number):Vec3{
         return new Vec3(this.x * scalar, this.y * scalar, this.z * scalar);
+    }
+    static lerp(alpha:number, a:Vec3, b:Vec3){
+        return a.add(b.add(a.mul(-1)).mul(alpha);
     }
 }
 class Camera{
@@ -66,6 +72,72 @@ let startX = 0;
 let startY = 0;
 let premoveY = 0;
 let premoveX = 0;
+abstract class object3d{
+    verticies: Vec3[],
+    triangles: number[],
+    fillStyle: string
+}
+class Cube implements object3d{
+    readonly verticies: Vec3[];
+    readonly triangles: number[];
+    readonly planes: Plane[] = [];
+    constructor(
+        readonly pos:Vec3,
+        public scale: Vec3,
+        public fillStyle: string
+    ){
+        this.verticies = [
+            new Vec3(-0.5 * scale.x, -0.5 * scale.y, -0.5*scale.z).add(pos),
+            new Vec3( 0.5 * scale.x, -0.5 * scale.y, -0.5*scale.z).add(pos),
+            new Vec3(-0.5 * scale.x,  0.5 * scale.y, -0.5*scale.z).add(pos),
+            new Vec3( 0.5 * scale.x,  0.5 * scale.y, -0.5*scale.z).add(pos),
+            new Vec3(-0.5 * scale.x, -0.5 * scale.y,  0.5*scale.z).add(pos),
+            new Vec3( 0.5 * scale.x, -0.5 * scale.y,  0.5*scale.z).add(pos),
+            new Vec3(-0.5 * scale.x,  0.5 * scale.y,  0.5*scale.z).add(pos),
+            new Vec3( 0.5 * scale.x,  0.5 * scale.y,  0.5*scale.z).add(pos)
+        ];
+        this.triangles = [
+            0,1,3,
+            0,2,3,
+            4,5,7,
+            4,6,7,
+            0,4,6,
+            0,2,6,
+            1,3,7,
+            1,5,7,
+            0,1,5,
+            0,4,5,
+            2,3,7,
+            2,6,7
+        ];
+    }
+}
+class Plane implements object3d{
+    verticies: Vec3[] = [];
+    triangles: number[] = [];
+    constructor(
+        public corners: Vec3[],
+        public size: number,
+        public fillStyle: string
+    ){
+        for(var y = 0; y <= size; y++){
+            for(var x = 0; x <= size; x++){
+                const newPoint = Vec3.lerp(y / size, Vec3.lerp(x / size, corners[0], corners[1]), Vec3.lerp(x / size, corners[2], corners[3]));
+                this.verticies.push(newPoint);
+            }
+        }
+        for(var y = 0; y < size; y++) {
+            for(var x = 0; x < size; x++) {
+                this.triangles.push(x + y * (size + 1));
+                this.triangles.push(x + y * (size + 1) + 1);
+                this.triangles.push(x + (y + 1) * (size + 1) + 1);
+                this.triangles.push(x + y * (size + 1));
+                this.triangles.push(x + (y + 1) * (size + 1));
+                this.triangles.push(x + (y + 1) * (size + 1) + 1);
+            }
+        }
+    }
+}
 const cube=[
     new Vec3(-1 + 3, -1 + 3, 5),
     new Vec3( 1 + 3, -1 + 3, 5),

@@ -22,8 +22,14 @@ var camera3d;
             this.y = y;
             this.z = z;
         }
+        add(other) {
+            return new Vec3(this.x + other.x, this.y + other.y, this.z + other.z);
+        }
         mul(scalar) {
             return new Vec3(this.x * scalar, this.y * scalar, this.z * scalar);
+        }
+        static lerp(alpha, a, b) {
+            return a.add(b.add(a.mul(-1)).mul(alpha));
         }
     }
     class Camera {
@@ -65,6 +71,40 @@ var camera3d;
     let startY = 0;
     let premoveY = 0;
     let premoveX = 0;
+    class Cube {
+        constructor(pos, scale, fillStyle) {
+            this.pos = pos;
+            this.scale = scale;
+            this.fillStyle = fillStyle;
+            this.verticies = [];
+            this.triangles = [];
+        }
+    }
+    class Plane {
+        constructor(corners, size, color) {
+            this.corners = corners;
+            this.size = size;
+            this.color = color;
+            this.verticies = [];
+            this.triangles = [];
+            for (var y = 0; y <= size; y++) {
+                for (var x = 0; x <= size; x++) {
+                    const newPoint = Vec3.lerp(y / size, Vec3.lerp(x / size, corners[0], corners[1]), Vec3.lerp(x / size, corners[2], corners[3]));
+                    this.verticies.push(newPoint);
+                }
+            }
+            for (var y = 0; y < size; y++) {
+                for (var x = 0; x < size; x++) {
+                    this.triangles.push(x + y * (size + 1));
+                    this.triangles.push(x + 1);
+                    this.triangles.push(x + (size + 1) + 1);
+                    this.triangles.push(x);
+                    this.triangles.push(x + (size + 1));
+                    this.triangles.push(x + (size + 1) + 1);
+                }
+            }
+        }
+    }
     const cube = [
         new Vec3(-1 + 3, -1 + 3, 5),
         new Vec3(1 + 3, -1 + 3, 5),
