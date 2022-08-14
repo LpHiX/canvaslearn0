@@ -67,3 +67,6 @@ export function rotX(angle:number, coord:Vec3):Vec3{
 export function rotY(angle:number, coord:Vec3):Vec3{
     return new Vec3(coord.x * Math.cos(angle) - coord.z * Math.sin(angle), coord.y, coord.x * Math.sin(angle) + coord.z * Math.cos(angle));
 }
+export function rotYXZ(angles: Vec3, coord:Vec3):Vec3{
+    return rotZ(angles.z, rotX(angles.x, rotY(angles.y, coord)));
+}

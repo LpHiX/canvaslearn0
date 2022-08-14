@@ -1,4 +1,4 @@
-import { Cube, Plane } from "./class3d.js";
+import { Cube, Plane, Torus } from "./class3d.js";
 import { Camera, Viewport, rotY } from "./camera.js";
 import { Vec3 } from "./structs.js";
 const canvas0 = document.getElementById("canvas0");
@@ -103,6 +103,7 @@ const cube2 = new Cube(new Vec3(2, 3, 2), new Vec3(-3, 1, 4), "rgb(0, 255, 0)");
 const plane = new Plane(new Vec3(10, 0, 10), new Vec3(10, 1, 10), new Vec3(0, -1, 3), "rgb(255, 100, 200");
 const cam0cube = new Cube(new Vec3(1, 1, 1), new Vec3(1, 2, 1), "rgb(255, 255 ,255)");
 const cam1cube = new Cube(new Vec3(1, 1, 1), new Vec3(1, 2, 1), "rgb(255, 255 ,255)");
+const torus = new Torus(new Vec3(2, 3, 5), "rgb(0, 0, 255)", 3, 0.5, new Vec3(12, 20, 0));
 var yvel = 0;
 function frameUpdate(timestamp) {
     if (wPressed) {
@@ -136,19 +137,21 @@ function frameUpdate(timestamp) {
     var view0buff = [];
     view0buff = view0buff.concat(cube.getTriangles(viewport0));
     view0buff = view0buff.concat(cube2.getTriangles(viewport0));
-    cube2.rotY(0.1);
     view0buff = view0buff.concat(cam1cube.getTriangles(viewport0));
     view0buff = view0buff.concat(plane.getTriangles(viewport0));
+    view0buff = view0buff.concat(torus.getTriangles(viewport0));
     viewport0.drawBuffer(view0buff);
     var view1buff = [];
     viewport1.ctx.fillStyle = "rgb(30, 40, 50)";
     viewport1.ctx.fillRect(0, 0, viewport1.canvas.width, viewport1.canvas.height);
     view1buff = view1buff.concat(cube.getTriangles(viewport1));
     view1buff = view1buff.concat(cube2.getTriangles(viewport1));
-    cube2.rotY(0.1);
     view1buff = view1buff.concat(cam0cube.getTriangles(viewport1));
     view1buff = view1buff.concat(plane.getTriangles(viewport1));
+    view1buff = view1buff.concat(torus.getTriangles(viewport1));
     viewport1.drawBuffer(view1buff);
+    cube2.rotY(0.1);
+    torus.eulerRot = torus.eulerRot.add(new Vec3(0.05, 0.2, 0.05).mul(0.1));
     window.requestAnimationFrame(frameUpdate);
 }
 setup();

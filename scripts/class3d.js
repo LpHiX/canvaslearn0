@@ -1,18 +1,19 @@
-import { rotY, Triangle } from "./camera.js";
+import { rotY, rotYXZ, Triangle } from "./camera.js";
 import { Vec3 } from "./structs.js";
 class object3d {
-    constructor(verticies, triangles, pos, fillStyle) {
+    constructor(verticies, triangles, pos, eulerRot, fillStyle) {
         this.verticies = verticies;
         this.triangles = triangles;
         this.pos = pos;
+        this.eulerRot = eulerRot;
         this.fillStyle = fillStyle;
     }
     getTriangles(viewport) {
         var buffer = [];
         for (var i = 0; i < this.triangles.length / 3; i++) {
-            const corner0 = viewport.vecToCanvas(this.verticies[this.triangles[i * 3]].add(this.pos));
-            const corner1 = viewport.vecToCanvas(this.verticies[this.triangles[i * 3 + 1]].add(this.pos));
-            const corner2 = viewport.vecToCanvas(this.verticies[this.triangles[i * 3 + 2]].add(this.pos));
+            const corner0 = viewport.vecToCanvas(rotYXZ(this.eulerRot, this.verticies[this.triangles[i * 3]]).add(this.pos));
+            const corner1 = viewport.vecToCanvas(rotYXZ(this.eulerRot, this.verticies[this.triangles[i * 3 + 1]]).add(this.pos));
+            const corner2 = viewport.vecToCanvas(rotYXZ(this.eulerRot, this.verticies[this.triangles[i * 3 + 2]]).add(this.pos));
             if (corner0 !== null && corner1 !== null && corner2 !== null) {
                 buffer.push(new Triangle(corner0, corner1, corner2, this.fillStyle));
             }
@@ -49,7 +50,7 @@ export class Cube extends object3d {
             0, 4, 5,
             2, 3, 7,
             2, 6, 7
-        ], pos, fillStyle);
+        ], pos, new Vec3(0, 0, 0), fillStyle);
         this.scale = scale;
         this.pos = pos;
         this.fillStyle = fillStyle;
@@ -57,7 +58,7 @@ export class Cube extends object3d {
 }
 export class Plane extends object3d {
     constructor(resolution, scale, pos, fillStyle) {
-        super([], [], pos, fillStyle);
+        super([], [], pos, new Vec3(0, 0, 0), fillStyle);
         this.resolution = resolution;
         this.scale = scale;
         this.pos = pos;
@@ -81,10 +82,30 @@ export class Plane extends object3d {
     }
 }
 export class Torus extends object3d {
-    constructor(plane, pos, fillStyle) {
-        super([], [], pos, fillStyle);
-        this.plane = plane;
+    constructor(pos, fillStyle, mainRadius, ringRadius, resolution) {
+        super([], [], pos, new Vec3(0, 0, 0), fillStyle);
         this.pos = pos;
         this.fillStyle = fillStyle;
+        this.mainRadius = mainRadius;
+        this.ringRadius = ringRadius;
+        this.resolution = resolution;
+        for (var y = 0; y <= resolution.y; y++) {
+            for (var x = 0; x <= resolution.x; x++) {
+                const angleX = 2 * Math.PI * x / resolution.x;
+                const angleY = 2 * Math.PI * y / resolution.y;
+                this.verticies.push(rotY(angleY, new Vec3(ringRadius * Math.cos(angleX), ringRadius * Math.sin(angleX), 0))
+                    .add(new Vec3(mainRadius * Math.cos(angleY), 0, mainRadius * Math.sin(angleY))));
+            }
+        }
+        for (var y = 0; y < resolution.y; y++) {
+            for (var x = 0; x < resolution.x; x++) {
+                this.triangles.push(x + y * (resolution.x + 1));
+                this.triangles.push(x + y * (resolution.x + 1) + 1);
+                this.triangles.push(x + (y + 1) * (resolution.x + 1) + 1);
+                this.triangles.push(x + y * (resolution.x + 1));
+                this.triangles.push(x + (y + 1) * (resolution.x + 1));
+                this.triangles.push(x + (y + 1) * (resolution.x + 1) + 1);
+            }
+        }
     }
 }
