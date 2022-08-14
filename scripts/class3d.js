@@ -20,11 +20,6 @@ class object3d {
         }
         return buffer;
     }
-    rotY(angle) {
-        for (var i = 0; i < this.verticies.length; i++) {
-            this.verticies[i] = rotY(angle, this.verticies[i]);
-        }
-    }
 }
 export class Cube extends object3d {
     constructor(scale, pos, fillStyle) {

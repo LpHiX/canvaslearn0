@@ -3,9 +3,7 @@ import {Vec2, Vec3} from "./structs.js";
 export class Camera{
     constructor(
         public pos:Vec3,
-        public angleX: number,
-        public angleY: number,
-        public angleZ: number
+        public eulerRot: Vec3
     ){}
 }
 export class Triangle{
@@ -36,7 +34,7 @@ export class Viewport{
             this.canvas.height / 2 -coord.y / this.size * this.canvasMin / 2, coord.z);
     }
     vecToCanvas(vertex: Vec3):Vec3 | null{
-        const vertRotated = rotZ(this.camera.angleZ, rotX(this.camera.angleX, rotY(this.camera.angleY, vertex.add(this.camera.pos.mul(-1)))));
+        const vertRotated = rotZ(-this.camera.eulerRot.z, rotX(-this.camera.eulerRot.x, rotY(-this.camera.eulerRot.y, vertex.add(this.camera.pos.mul(-1)))));
         if(vertRotated.z > 0){
             return this.g2c(new Vec3(vertRotated.x / (vertRotated.z), vertRotated.y / (vertRotated.z), vertRotated.z));
         } else {
@@ -68,5 +66,5 @@ export function rotY(angle:number, coord:Vec3):Vec3{
     return new Vec3(coord.x * Math.cos(angle) - coord.z * Math.sin(angle), coord.y, coord.x * Math.sin(angle) + coord.z * Math.cos(angle));
 }
 export function rotYXZ(angles: Vec3, coord:Vec3):Vec3{
-    return rotZ(angles.z, rotX(angles.x, rotY(angles.y, coord)));
+    return rotY(angles.y, rotX(angles.x, rotZ(angles.z, coord)));
 }

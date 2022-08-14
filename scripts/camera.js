@@ -1,10 +1,8 @@
 import { Vec3 } from "./structs.js";
 export class Camera {
-    constructor(pos, angleX, angleY, angleZ) {
+    constructor(pos, eulerRot) {
         this.pos = pos;
-        this.angleX = angleX;
-        this.angleY = angleY;
-        this.angleZ = angleZ;
+        this.eulerRot = eulerRot;
     }
 }
 export class Triangle {
@@ -29,7 +27,7 @@ export class Viewport {
         return new Vec3(this.canvas.width / 2 + coord.x / this.size * this.canvasMin / 2, this.canvas.height / 2 - coord.y / this.size * this.canvasMin / 2, coord.z);
     }
     vecToCanvas(vertex) {
-        const vertRotated = rotZ(this.camera.angleZ, rotX(this.camera.angleX, rotY(this.camera.angleY, vertex.add(this.camera.pos.mul(-1)))));
+        const vertRotated = rotZ(-this.camera.eulerRot.z, rotX(-this.camera.eulerRot.x, rotY(-this.camera.eulerRot.y, vertex.add(this.camera.pos.mul(-1)))));
         if (vertRotated.z > 0) {
             return this.g2c(new Vec3(vertRotated.x / (vertRotated.z), vertRotated.y / (vertRotated.z), vertRotated.z));
         }
@@ -61,5 +59,5 @@ export function rotY(angle, coord) {
     return new Vec3(coord.x * Math.cos(angle) - coord.z * Math.sin(angle), coord.y, coord.x * Math.sin(angle) + coord.z * Math.cos(angle));
 }
 export function rotYXZ(angles, coord) {
-    return rotZ(angles.z, rotX(angles.x, rotY(angles.y, coord)));
+    return rotY(angles.y, rotX(angles.x, rotZ(angles.z, coord)));
 }

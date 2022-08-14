@@ -4,9 +4,9 @@ import { Vec3 } from "./structs.js";
 const canvas0 = document.getElementById("canvas0");
 const canvas1 = document.getElementById("canvas1");
 const debugText = document.getElementById("debugText");
-const cam0 = new Camera(new Vec3(0, 0, 0), 0, 0, 0);
+const cam0 = new Camera(new Vec3(0, 0, 0), new Vec3(0, 0, 0));
 const viewport0 = new Viewport(canvas0, cam0, 1);
-const cam1 = new Camera(new Vec3(-10, 0, 0), 0, Math.PI / 2, 0);
+const cam1 = new Camera(new Vec3(-10, 0, 0), new Vec3(0, -Math.PI / 2, 0));
 const viewport1 = new Viewport(canvas1, cam1, 1);
 let forward = false;
 let down = false;
@@ -22,45 +22,41 @@ let spacePressed = false;
 function setup() {
     canvas0.addEventListener("mousedown", function (event) {
         down = true;
-        premoveX = cam0.angleX;
-        premoveY = cam0.angleY;
+        premoveX = cam0.eulerRot.x;
+        premoveY = cam0.eulerRot.y;
         startX = event.clientX;
         startY = event.clientY;
     });
     canvas0.addEventListener("mouseup", () => {
         down = false;
-        premoveX = cam0.angleX;
-        premoveY = cam0.angleY;
+        premoveX = cam0.eulerRot.x;
+        premoveY = cam0.eulerRot.y;
     });
     canvas0.addEventListener("touchstart", function (event) {
         down = true;
-        premoveX = cam0.angleX;
-        premoveY = cam0.angleY;
+        forward = true;
+        premoveX = cam0.eulerRot.x;
+        premoveY = cam0.eulerRot.y;
         startX = event.touches[0].clientX;
         startY = event.touches[0].clientY;
     });
     canvas0.addEventListener("touchend", () => {
         down = false;
-        premoveX = cam0.angleX;
-        premoveY = cam0.angleY;
+        forward = false;
+        premoveX = cam0.eulerRot.x;
+        premoveY = cam0.eulerRot.y;
     });
     canvas0.addEventListener("mousemove", function (event) {
         if (down) {
-            cam0.angleY = premoveY + (event.clientX - startX) / 100;
-            cam0.angleX = premoveX - (event.clientY - startY) / 100;
+            cam0.eulerRot.y = premoveY - (event.clientX - startX) / 100;
+            cam0.eulerRot.x = premoveX + (event.clientY - startY) / 100;
         }
     });
     canvas0.addEventListener("touchmove", function (event) {
         if (down) {
-            cam0.angleY = premoveY + (event.touches[0].clientX - startX) / 100;
-            cam0.angleX = premoveX - (event.touches[0].clientY - startY) / 100;
+            cam0.eulerRot.y = premoveY - (event.touches[0].clientX - startX) / 100;
+            cam0.eulerRot.x = premoveX + (event.touches[0].clientY - startY) / 100;
         }
-    });
-    canvas1.addEventListener("touchdown", function (event) {
-        forward = true;
-    });
-    canvas1.addEventListener("touchend", function (event) {
-        forward = false;
     });
     document.addEventListener("keydown", function (event) {
         switch (event.key) {
@@ -114,16 +110,16 @@ const torus = new Torus(new Vec3(2, 3, 5), "rgb(0, 0, 255)", 3, 0.5, new Vec3(12
 var yvel = 0;
 function frameUpdate(timestamp) {
     if (wPressed) {
-        cam0.pos = cam0.pos.add(rotY(-cam0.angleY, new Vec3(0, 0, 0.1)));
+        cam0.pos = cam0.pos.add(rotY(cam0.eulerRot.y, new Vec3(0, 0, 0.1)));
     }
     if (aPressed) {
-        cam0.pos = cam0.pos.add(rotY(-cam0.angleY, new Vec3(-0.1, 0, 0)));
+        cam0.pos = cam0.pos.add(rotY(cam0.eulerRot.y, new Vec3(-0.1, 0, 0)));
     }
     if (sPressed) {
-        cam0.pos = cam0.pos.add(rotY(-cam0.angleY, new Vec3(0, 0, -0.1)));
+        cam0.pos = cam0.pos.add(rotY(cam0.eulerRot.y, new Vec3(0, 0, -0.1)));
     }
     if (dPressed) {
-        cam0.pos = cam0.pos.add(rotY(-cam0.angleY, new Vec3(0.1, 0, 0)));
+        cam0.pos = cam0.pos.add(rotY(cam0.eulerRot.y, new Vec3(0.1, 0, 0)));
     }
     if (cam0.pos.y > 0) {
         yvel -= 1;
@@ -138,7 +134,7 @@ function frameUpdate(timestamp) {
         }
     }
     if (forward) {
-        cam0.pos = cam0.pos.add(rotY(-cam0.angleY, new Vec3(0, 0, 0.1)));
+        cam0.pos = cam0.pos.add(rotY(cam0.eulerRot.y, new Vec3(0, 0, 0.1)));
     }
     cam0cube.pos = cam0.pos;
     cam1cube.pos = cam1.pos;
@@ -160,8 +156,9 @@ function frameUpdate(timestamp) {
     view1buff = view1buff.concat(plane.getTriangles(viewport1));
     view1buff = view1buff.concat(torus.getTriangles(viewport1));
     viewport1.drawBuffer(view1buff);
-    cube2.rotY(0.1);
-    torus.eulerRot = torus.eulerRot.add(new Vec3(0.05, 0.2, 0.05).mul(0.1));
+    cube2.eulerRot = cube2.eulerRot.add(new Vec3(1, 0, 0).mul(0.01));
+    cam0cube.eulerRot = cam0.eulerRot;
+    torus.eulerRot = torus.eulerRot.add(new Vec3(0.1, 0.1, 0.1).mul(0.1));
     window.requestAnimationFrame(frameUpdate);
 }
 setup();
