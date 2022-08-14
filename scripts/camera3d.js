@@ -8,6 +8,7 @@ const cam0 = new Camera(new Vec3(0, 0, 0), 0, 0, 0);
 const viewport0 = new Viewport(canvas0, cam0, 1);
 const cam1 = new Camera(new Vec3(-10, 0, 0), 0, Math.PI / 2, 0);
 const viewport1 = new Viewport(canvas1, cam1, 1);
+let forward = false;
 let down = false;
 let startX = 0;
 let startY = 0;
@@ -54,6 +55,12 @@ function setup() {
             cam0.angleY = premoveY + (event.touches[0].clientX - startX) / 100;
             cam0.angleX = premoveX - (event.touches[0].clientY - startY) / 100;
         }
+    });
+    canvas1.addEventListener("touchdown", function (event) {
+        forward = true;
+    });
+    canvas1.addEventListener("touchend", function (event) {
+        forward = false;
     });
     document.addEventListener("keydown", function (event) {
         switch (event.key) {
@@ -129,6 +136,9 @@ function frameUpdate(timestamp) {
             yvel = 20;
             cam0.pos.y += 0.1;
         }
+    }
+    if (forward) {
+        cam0.pos = cam0.pos.add(rotY(-cam0.angleY, new Vec3(0, 0, 0.1)));
     }
     cam0cube.pos = cam0.pos;
     cam1cube.pos = cam1.pos;
