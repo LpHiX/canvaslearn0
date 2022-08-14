@@ -26,7 +26,7 @@ export class Viewport {
         this.ctx = this.canvas.getContext("2d");
     }
     g2c(coord) {
-        return new Vec3(this.canvas.width / 2 + coord.x / this.size * this.canvasMin / 2, this.canvas.height / 2 + -coord.y / this.size * this.canvasMin / 2, coord.z);
+        return new Vec3(this.canvas.width / 2 + coord.x / this.size * this.canvasMin / 2, this.canvas.height / 2 - coord.y / this.size * this.canvasMin / 2, coord.z);
     }
     vecToCanvas(vertex) {
         const vertRotated = rotZ(this.camera.angleZ, rotX(this.camera.angleX, rotY(this.camera.angleY, vertex.add(this.camera.pos.mul(-1)))));

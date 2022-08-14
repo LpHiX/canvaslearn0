@@ -56,27 +56,35 @@ export class Cube extends object3d {
     }
 }
 export class Plane extends object3d {
-    constructor(size, scale, pos, fillStyle) {
+    constructor(resolution, scale, pos, fillStyle) {
         super([], [], pos, fillStyle);
-        this.size = size;
+        this.resolution = resolution;
         this.scale = scale;
         this.pos = pos;
         this.fillStyle = fillStyle;
-        for (var z = 0; z <= size; z++) {
-            for (var x = 0; x <= size; x++) {
-                const newPoint = Vec3.lerp(z / size, Vec3.lerp(x / size, new Vec3(-scale.x / 2, 0, -scale.z / 2), new Vec3(scale.x / 2, 0, -scale.z / 2)), Vec3.lerp(x / size, new Vec3(-scale.x / 2, 0, scale.z / 2), new Vec3(scale.x / 2, 0, scale.z / 2)));
+        for (var z = 0; z <= resolution.z; z++) {
+            for (var x = 0; x <= resolution.x; x++) {
+                const newPoint = Vec3.lerp(z / resolution.z, Vec3.lerp(x / resolution.x, new Vec3(-scale.x / 2, 0, -scale.z / 2), new Vec3(scale.x / 2, 0, -scale.z / 2)), Vec3.lerp(x / resolution.x, new Vec3(-scale.x / 2, 0, scale.z / 2), new Vec3(scale.x / 2, 0, scale.z / 2)));
                 this.verticies.push(newPoint);
             }
         }
-        for (var y = 0; y < size; y++) {
-            for (var x = 0; x < size; x++) {
-                this.triangles.push(x + y * (size + 1));
-                this.triangles.push(x + y * (size + 1) + 1);
-                this.triangles.push(x + (y + 1) * (size + 1) + 1);
-                this.triangles.push(x + y * (size + 1));
-                this.triangles.push(x + (y + 1) * (size + 1));
-                this.triangles.push(x + (y + 1) * (size + 1) + 1);
+        for (var y = 0; y < resolution.z; y++) {
+            for (var x = 0; x < resolution.x; x++) {
+                this.triangles.push(x + y * (resolution.x + 1));
+                this.triangles.push(x + y * (resolution.x + 1) + 1);
+                this.triangles.push(x + (y + 1) * (resolution.x + 1) + 1);
+                this.triangles.push(x + y * (resolution.x + 1));
+                this.triangles.push(x + (y + 1) * (resolution.x + 1));
+                this.triangles.push(x + (y + 1) * (resolution.x + 1) + 1);
             }
         }
+    }
+}
+export class Torus extends object3d {
+    constructor(plane, pos, fillStyle) {
+        super([], [], pos, fillStyle);
+        this.plane = plane;
+        this.pos = pos;
+        this.fillStyle = fillStyle;
     }
 }

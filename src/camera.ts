@@ -33,7 +33,7 @@ export class Viewport{
     g2c(coord:Vec3):Vec3{
         return new Vec3(
             this.canvas.width / 2 + coord.x / this.size * this.canvasMin / 2,
-            this.canvas.height / 2 +-coord.y / this.size * this.canvasMin / 2, coord.z);
+            this.canvas.height / 2 -coord.y / this.size * this.canvasMin / 2, coord.z);
     }
     vecToCanvas(vertex: Vec3):Vec3 | null{
         const vertRotated = rotZ(this.camera.angleZ, rotX(this.camera.angleX, rotY(this.camera.angleY, vertex.add(this.camera.pos.mul(-1)))));

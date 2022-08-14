@@ -100,7 +100,7 @@ function setup() {
 }
 const cube = new Cube(new Vec3(1, 1, 1), new Vec3(2, 3, 5), "rgb(0, 255, 255)");
 const cube2 = new Cube(new Vec3(2, 3, 2), new Vec3(-3, 1, 4), "rgb(0, 255, 0)");
-const plane = new Plane(10, new Vec3(10, 1, 10), new Vec3(0, -1, 3), "rgb(255, 100, 200");
+const plane = new Plane(new Vec3(10, 0, 10), new Vec3(10, 1, 10), new Vec3(0, -1, 3), "rgb(255, 100, 200");
 const cam0cube = new Cube(new Vec3(1, 1, 1), new Vec3(1, 2, 1), "rgb(255, 255 ,255)");
 const cam1cube = new Cube(new Vec3(1, 1, 1), new Vec3(1, 2, 1), "rgb(255, 255 ,255)");
 var yvel = 0;
