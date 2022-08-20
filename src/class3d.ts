@@ -1,7 +1,7 @@
 import {Viewport, rotX, rotY, rotZ, rotYXZ, Triangle} from "./camera.js";
 import {Vec3} from "./structs.js";
 
-abstract class object3d{
+abstract class Object3d{
     constructor(
         public verticies: Vec3[],
         public triangles: number[],
@@ -24,7 +24,7 @@ abstract class object3d{
         return buffer;
     }
 }
-export class Cube extends object3d{
+export class Cube extends Object3d{
     constructor(
         public scale: Vec3,
         public pos: Vec3,
@@ -56,7 +56,13 @@ export class Cube extends object3d{
             ], pos, new Vec3(0,0,0), fillStyle);
     }
 }
-export class Plane extends object3d{
+export class World{
+    objects: Object3d[];
+    constructor(){
+        this.objects = [];
+    }   
+}
+export class Plane extends Object3d{
     constructor(
         public resolution: Vec3,
         public scale: Vec3,
@@ -86,7 +92,7 @@ export class Plane extends object3d{
         }
     }
 }
-export class Torus extends object3d{
+export class Torus extends Object3d{
     constructor(
         public pos:Vec3,
         public fillStyle:string,

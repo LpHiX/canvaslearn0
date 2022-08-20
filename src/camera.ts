@@ -55,7 +55,6 @@ export class Viewport{
         });
     }
 }
-
 export function rotZ(angle:number, coord:Vec3):Vec3{
     return new Vec3(coord.x * Math.cos(angle) - coord.y * Math.sin(angle), coord.x * Math.sin(angle) + coord.y * Math.cos(angle), coord.z);
 }
