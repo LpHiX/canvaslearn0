@@ -1,6 +1,6 @@
 import { rotY, rotYXZ, Triangle } from "./camera.js";
 import { Vec3 } from "./structs.js";
-class object3d {
+export class Object3d {
     constructor(verticies, triangles, pos, eulerRot, fillStyle) {
         this.verticies = verticies;
         this.triangles = triangles;
@@ -11,9 +11,21 @@ class object3d {
     getTriangles(viewport) {
         var buffer = [];
         for (var i = 0; i < this.triangles.length / 3; i++) {
-            const corner0 = viewport.vecToCanvas(rotYXZ(this.eulerRot, this.verticies[this.triangles[i * 3]]).add(this.pos));
-            const corner1 = viewport.vecToCanvas(rotYXZ(this.eulerRot, this.verticies[this.triangles[i * 3 + 1]]).add(this.pos));
-            const corner2 = viewport.vecToCanvas(rotYXZ(this.eulerRot, this.verticies[this.triangles[i * 3 + 2]]).add(this.pos));
+            const corner0 = viewport.vecToCanvas(rotYXZ(this.eulerRot, this.verticies[this.triangles[i * 3]]).add(this.pos), true);
+            const corner1 = viewport.vecToCanvas(rotYXZ(this.eulerRot, this.verticies[this.triangles[i * 3 + 1]]).add(this.pos), true);
+            const corner2 = viewport.vecToCanvas(rotYXZ(this.eulerRot, this.verticies[this.triangles[i * 3 + 2]]).add(this.pos), true);
+            if (corner0 !== null && corner1 !== null && corner2 !== null) {
+                buffer.push(new Triangle(corner0, corner1, corner2, this.fillStyle));
+            }
+        }
+        return buffer;
+    }
+    projectVerticies(fromView, toView) {
+        var buffer = [];
+        for (var i = 0; i < this.triangles.length / 3; i++) {
+            const corner0 = fromView.canonVertex(this.verticies[this.triangles[i * 3]], this.eulerRot, this.pos, toView);
+            const corner1 = fromView.canonVertex(this.verticies[this.triangles[i * 3 + 1]], this.eulerRot, this.pos, toView);
+            const corner2 = fromView.canonVertex(this.verticies[this.triangles[i * 3 + 2]], this.eulerRot, this.pos, toView);
             if (corner0 !== null && corner1 !== null && corner2 !== null) {
                 buffer.push(new Triangle(corner0, corner1, corner2, this.fillStyle));
             }
@@ -21,7 +33,7 @@ class object3d {
         return buffer;
     }
 }
-export class Cube extends object3d {
+export class Cube extends Object3d {
     constructor(scale, pos, fillStyle) {
         super([
             new Vec3(-0.5 * scale.x, -0.5 * scale.y, -0.5 * scale.z),
@@ -51,7 +63,28 @@ export class Cube extends object3d {
         this.fillStyle = fillStyle;
     }
 }
-export class Plane extends object3d {
+export class World {
+    constructor() {
+        this.objects = [];
+    }
+    loadBuffer(viewport) {
+        var buffer = [];
+        this.objects.forEach(object => {
+            if (object !== viewport.camera.cameraModel) {
+                buffer = buffer.concat(object.getTriangles(viewport));
+            }
+        });
+        return buffer;
+    }
+    loadCanonBuffer(fromView, toView) {
+        var buffer = [];
+        this.objects.forEach(object => {
+            buffer = buffer.concat(object.projectVerticies(fromView, toView));
+        });
+        return buffer;
+    }
+}
+export class Plane extends Object3d {
     constructor(resolution, scale, pos, fillStyle) {
         super([], [], pos, new Vec3(0, 0, 0), fillStyle);
         this.resolution = resolution;
@@ -76,7 +109,7 @@ export class Plane extends object3d {
         }
     }
 }
-export class Torus extends object3d {
+export class Torus extends Object3d {
     constructor(pos, fillStyle, mainRadius, ringRadius, resolution) {
         super([], [], pos, new Vec3(0, 0, 0), fillStyle);
         this.pos = pos;
