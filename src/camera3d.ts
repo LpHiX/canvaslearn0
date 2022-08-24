@@ -105,17 +105,7 @@ function setup(){
         //event.preventDefault();
     });
 }
-const cube = new Cube(new Vec3(1, 1, 1), new Vec3( 2, 3, 5), "rgb(0, 255, 255)");
-const cube2 = new Cube(new Vec3(2, 3, 2), new Vec3( -3, 1, 4), "rgb(0, 255, 0)");
-const plane = new Plane(new Vec3(10, 0, 10), new Vec3(10, 1, 10), new Vec3(0, -1, 3), "rgb(255, 100, 200");
-const cam0cube = new Cube(new Vec3(1, 1, 1), new Vec3( 1, 2, 1), "rgb(255, 255 ,255)");
-const cam1cube = new Cube(new Vec3(1, 1, 1), new Vec3( 1, 2, 1), "rgb(255, 255 ,255)");
-const torus = new Torus(new Vec3( 2, 3, 5), "rgb(0, 0, 255)", 3, 0.5, new Vec3(12, 20, 0));
-const world0 = new World()
-world0.objects = [cube, cube2, plane, cam0cube, cam1cube, torus]
-var yvel = 0;
-
-function frameUpdate(timestamp:number){
+function updateUser() {
     if(wPressed){
         cam0.pos = cam0.pos.add(rotY(cam0.eulerRot.y,new Vec3(0, 0, 0.1)));
     }
@@ -144,6 +134,20 @@ function frameUpdate(timestamp:number){
     }
     cam0cube.pos = cam0.pos;
     cam1cube.pos = cam1.pos;
+}
+
+const cube = new Cube(new Vec3(1, 1, 1), new Vec3( 2, 3, 5), "rgb(0, 255, 255)");
+const cube2 = new Cube(new Vec3(2, 3, 2), new Vec3( -3, 1, 4), "rgb(0, 255, 0)");
+const plane = new Plane(new Vec3(10, 0, 10), new Vec3(10, 1, 10), new Vec3(0, -1, 3), "rgb(255, 100, 200");
+const cam0cube = new Cube(new Vec3(1, 1, 1), new Vec3( 1, 2, 1), "rgb(255, 255 ,255)");
+const cam1cube = new Cube(new Vec3(1, 1, 1), new Vec3( 1, 2, 1), "rgb(255, 255 ,255)");
+const torus = new Torus(new Vec3( 2, 3, 5), "rgb(0, 0, 255)", 3, 0.5, new Vec3(12, 20, 0));
+const world0 = new World()
+world0.objects = [cube, cube2, plane, cam0cube, cam1cube, torus]
+var yvel = 0;
+
+function frameUpdate(timestamp:number){
+    updateUser();
 
     viewport0.ctx.fillStyle = "rgb(30, 40, 50)";
     viewport0.ctx.fillRect(0, 0, viewport0.canvas.width, viewport0.canvas.height);

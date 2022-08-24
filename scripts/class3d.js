@@ -1,6 +1,6 @@
 import { rotY, rotYXZ, Triangle } from "./camera.js";
 import { Vec3 } from "./structs.js";
-class object3d {
+class Object3d {
     constructor(verticies, triangles, pos, eulerRot, fillStyle) {
         this.verticies = verticies;
         this.triangles = triangles;
@@ -21,7 +21,7 @@ class object3d {
         return buffer;
     }
 }
-export class Cube extends object3d {
+export class Cube extends Object3d {
     constructor(scale, pos, fillStyle) {
         super([
             new Vec3(-0.5 * scale.x, -0.5 * scale.y, -0.5 * scale.z),
@@ -51,7 +51,16 @@ export class Cube extends object3d {
         this.fillStyle = fillStyle;
     }
 }
-export class Plane extends object3d {
+export class World {
+    constructor() {
+        this.objects = [];
+    }
+    createTriangleBuffer() {
+        this.objects.forEach(object => {
+        });
+    }
+}
+export class Plane extends Object3d {
     constructor(resolution, scale, pos, fillStyle) {
         super([], [], pos, new Vec3(0, 0, 0), fillStyle);
         this.resolution = resolution;
@@ -76,7 +85,7 @@ export class Plane extends object3d {
         }
     }
 }
-export class Torus extends object3d {
+export class Torus extends Object3d {
     constructor(pos, fillStyle, mainRadius, ringRadius, resolution) {
         super([], [], pos, new Vec3(0, 0, 0), fillStyle);
         this.pos = pos;

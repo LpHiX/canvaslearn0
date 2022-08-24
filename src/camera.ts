@@ -1,3 +1,4 @@
+import { World } from "./class3d";
 import {Vec2, Vec3} from "./structs.js";
 
 export class Camera{
@@ -41,7 +42,7 @@ export class Viewport{
             return null;
         }
     }
-    drawBuffer(buffer: Triangle[]){
+    drawBuffer(buffer: Triangle[]):void{
         buffer = buffer.sort((a,b) => (a.avgZ < b.avgZ) ? 1 : -1);
         buffer.forEach(triangle => {
             this.ctx.fillStyle = triangle.fillStyle;
@@ -53,6 +54,9 @@ export class Viewport{
             this.ctx.stroke();
             this.ctx.fill();
         });
+    }
+    drawWorld(world:World):void{
+        
     }
 }
 export function rotZ(angle:number, coord:Vec3):Vec3{

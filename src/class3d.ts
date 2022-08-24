@@ -60,7 +60,12 @@ export class World{
     objects: Object3d[];
     constructor(){
         this.objects = [];
-    }   
+    }
+    createTriangleBuffer(){
+        this.objects.forEach(object => {
+            
+        })
+    }
 }
 export class Plane extends Object3d{
     constructor(

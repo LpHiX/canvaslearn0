@@ -1,4 +1,4 @@
-import { Cube, Plane, Torus } from "./class3d.js";
+import { Cube, Plane, Torus, World } from "./class3d.js";
 import { Camera, Viewport, rotY } from "./camera.js";
 import { Vec3 } from "./structs.js";
 const canvas0 = document.getElementById("canvas0");
@@ -107,6 +107,8 @@ const plane = new Plane(new Vec3(10, 0, 10), new Vec3(10, 1, 10), new Vec3(0, -1
 const cam0cube = new Cube(new Vec3(1, 1, 1), new Vec3(1, 2, 1), "rgb(255, 255 ,255)");
 const cam1cube = new Cube(new Vec3(1, 1, 1), new Vec3(1, 2, 1), "rgb(255, 255 ,255)");
 const torus = new Torus(new Vec3(2, 3, 5), "rgb(0, 0, 255)", 3, 0.5, new Vec3(12, 20, 0));
+const world0 = new World();
+world0.objects = [cube, cube2, plane, cam0cube, cam1cube, torus];
 var yvel = 0;
 function frameUpdate(timestamp) {
     if (wPressed) {
@@ -147,6 +149,7 @@ function frameUpdate(timestamp) {
     view0buff = view0buff.concat(plane.getTriangles(viewport0));
     view0buff = view0buff.concat(torus.getTriangles(viewport0));
     viewport0.drawBuffer(view0buff);
+    viewport0.drawWorld(world0);
     var view1buff = [];
     viewport1.ctx.fillStyle = "rgb(30, 40, 50)";
     viewport1.ctx.fillRect(0, 0, viewport1.canvas.width, viewport1.canvas.height);
