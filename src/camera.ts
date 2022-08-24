@@ -16,6 +16,7 @@ export class Triangle{
         public vert0: Vec3,
         public vert1: Vec3,
         public vert2: Vec3,
+        public wireframe: boolean,
         public fillStyle: string
     ){
         this.avgZ = (vert0.z + vert1.z + vert2.z) / 3;
@@ -58,8 +59,14 @@ export class Viewport{
             this.ctx.lineTo(triangle.vert1.x, triangle.vert1.y);
             this.ctx.lineTo(triangle.vert2.x, triangle.vert2.y);
             this.ctx.closePath()
+            if(!triangle.wireframe){
+                this.ctx.fill();
+                this.ctx.strokeStyle = "rgb(0,0,0)";
+            } else{
+                this.ctx.strokeStyle = triangle.fillStyle;
+            }
             this.ctx.stroke();
-            this.ctx.fill();
+
         });
     }
     canonVertex(coord:Vec3, eulerAngle: Vec3, objPos: Vec3, toView:Viewport):Vec3 | null{
@@ -68,7 +75,9 @@ export class Viewport{
         coord = coord.add(this.camera.pos.mul(-1));
         coord = rotZXY(this.camera.eulerRot.mul(-1), coord);
         coord = new Vec3(coord.x / coord.z, coord.y / coord.z, (coord.z - this.camera.near) / (this.camera.far - this.camera.near))
+        //if(coord.z > 0){
         if(coord.x < 1 && coord.x > -1 && coord.y < 1 && coord.y > -1 && coord.z > 0 && coord.z < 1){
+            coord.z += 0.5;
             coord = rotZXY(this.camera.eulerRot, coord);
             coord = coord.add(this.camera.pos);
             return toView.vecToCanvas(coord, false);

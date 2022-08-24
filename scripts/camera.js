@@ -9,10 +9,11 @@ export class Camera {
     }
 }
 export class Triangle {
-    constructor(vert0, vert1, vert2, fillStyle) {
+    constructor(vert0, vert1, vert2, wireframe, fillStyle) {
         this.vert0 = vert0;
         this.vert1 = vert1;
         this.vert2 = vert2;
+        this.wireframe = wireframe;
         this.fillStyle = fillStyle;
         this.avgZ = (vert0.z + vert1.z + vert2.z) / 3;
     }
@@ -51,8 +52,14 @@ export class Viewport {
             this.ctx.lineTo(triangle.vert1.x, triangle.vert1.y);
             this.ctx.lineTo(triangle.vert2.x, triangle.vert2.y);
             this.ctx.closePath();
+            if (!triangle.wireframe) {
+                this.ctx.fill();
+                this.ctx.strokeStyle = "rgb(0,0,0)";
+            }
+            else {
+                this.ctx.strokeStyle = triangle.fillStyle;
+            }
             this.ctx.stroke();
-            this.ctx.fill();
         });
     }
     canonVertex(coord, eulerAngle, objPos, toView) {
@@ -61,7 +68,9 @@ export class Viewport {
         coord = coord.add(this.camera.pos.mul(-1));
         coord = rotZXY(this.camera.eulerRot.mul(-1), coord);
         coord = new Vec3(coord.x / coord.z, coord.y / coord.z, (coord.z - this.camera.near) / (this.camera.far - this.camera.near));
+        //if(coord.z > 0){
         if (coord.x < 1 && coord.x > -1 && coord.y < 1 && coord.y > -1 && coord.z > 0 && coord.z < 1) {
+            coord.z += 0.5;
             coord = rotZXY(this.camera.eulerRot, coord);
             coord = coord.add(this.camera.pos);
             return toView.vecToCanvas(coord, false);

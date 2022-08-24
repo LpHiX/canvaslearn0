@@ -7,6 +7,7 @@ export abstract class Object3d{
         public triangles: number[],
         public pos: Vec3,
         public eulerRot: Vec3,
+        public wireframe: boolean,
         public fillStyle: string
     ){
     }
@@ -18,7 +19,7 @@ export abstract class Object3d{
             const corner1 = viewport.vecToCanvas(rotYXZ(this.eulerRot, this.verticies[this.triangles[i* 3 + 1]]).add(this.pos), true);
             const corner2 = viewport.vecToCanvas(rotYXZ(this.eulerRot, this.verticies[this.triangles[i* 3 + 2]]).add(this.pos), true);
             if(corner0 !== null && corner1 !== null && corner2 !== null){
-                buffer.push(new Triangle(corner0, corner1, corner2, this.fillStyle));
+                buffer.push(new Triangle(corner0, corner1, corner2, this.wireframe, this.fillStyle));
             }
         }
         return buffer;
@@ -30,7 +31,7 @@ export abstract class Object3d{
             const corner1 = fromView.canonVertex(this.verticies[this.triangles[i* 3 + 1]], this.eulerRot, this.pos, toView);
             const corner2 = fromView.canonVertex(this.verticies[this.triangles[i* 3 + 2]], this.eulerRot, this.pos, toView);
             if(corner0 !== null && corner1 !== null && corner2 !== null){
-                buffer.push(new Triangle(corner0, corner1, corner2, this.fillStyle));
+                buffer.push(new Triangle(corner0, corner1, corner2, this.wireframe, this.fillStyle));
             }
         }
         return buffer;
@@ -40,6 +41,7 @@ export class Cube extends Object3d{
     constructor(
         public scale: Vec3,
         public pos: Vec3,
+        public wireframe: boolean,
         public fillStyle: string
     ){
         super(
@@ -65,7 +67,7 @@ export class Cube extends Object3d{
                 0,4,5,
                 2,3,7,
                 2,6,7
-            ], pos, new Vec3(0,0,0), fillStyle);
+            ], pos, new Vec3(0,0,0), wireframe, fillStyle);
     }
 }
 export class World{
@@ -95,10 +97,11 @@ export class Plane extends Object3d{
         public resolution: Vec3,
         public scale: Vec3,
         public pos: Vec3,
+        public wireframe: boolean,
         public fillStyle: string
     ){
         super(
-            [], [], pos, new Vec3(0,0,0), fillStyle
+            [], [], pos, new Vec3(0,0,0), wireframe, fillStyle
         );
         for(var z = 0; z <= resolution.z; z++){
             for(var x = 0; x <= resolution.x; x++){
@@ -123,12 +126,13 @@ export class Plane extends Object3d{
 export class Torus extends Object3d{
     constructor(
         public pos:Vec3,
+        public wireframe: boolean,
         public fillStyle:string,
         private mainRadius: number,
         private ringRadius: number,
         private resolution: Vec3
     ){
-        super([], [], pos, new Vec3(0,0,0), fillStyle);
+        super([], [], pos, new Vec3(0,0,0), wireframe, fillStyle);
         for(var y = 0; y <= resolution.y; y++){
             for(var x = 0; x <= resolution.x; x++){
                 const angleX = 2 * Math.PI * x / resolution.x;

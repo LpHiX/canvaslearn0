@@ -1,11 +1,12 @@
 import { rotY, rotYXZ, Triangle } from "./camera.js";
 import { Vec3 } from "./structs.js";
 export class Object3d {
-    constructor(verticies, triangles, pos, eulerRot, fillStyle) {
+    constructor(verticies, triangles, pos, eulerRot, wireframe, fillStyle) {
         this.verticies = verticies;
         this.triangles = triangles;
         this.pos = pos;
         this.eulerRot = eulerRot;
+        this.wireframe = wireframe;
         this.fillStyle = fillStyle;
     }
     getTriangles(viewport) {
@@ -15,7 +16,7 @@ export class Object3d {
             const corner1 = viewport.vecToCanvas(rotYXZ(this.eulerRot, this.verticies[this.triangles[i * 3 + 1]]).add(this.pos), true);
             const corner2 = viewport.vecToCanvas(rotYXZ(this.eulerRot, this.verticies[this.triangles[i * 3 + 2]]).add(this.pos), true);
             if (corner0 !== null && corner1 !== null && corner2 !== null) {
-                buffer.push(new Triangle(corner0, corner1, corner2, this.fillStyle));
+                buffer.push(new Triangle(corner0, corner1, corner2, this.wireframe, this.fillStyle));
             }
         }
         return buffer;
@@ -27,14 +28,14 @@ export class Object3d {
             const corner1 = fromView.canonVertex(this.verticies[this.triangles[i * 3 + 1]], this.eulerRot, this.pos, toView);
             const corner2 = fromView.canonVertex(this.verticies[this.triangles[i * 3 + 2]], this.eulerRot, this.pos, toView);
             if (corner0 !== null && corner1 !== null && corner2 !== null) {
-                buffer.push(new Triangle(corner0, corner1, corner2, this.fillStyle));
+                buffer.push(new Triangle(corner0, corner1, corner2, this.wireframe, this.fillStyle));
             }
         }
         return buffer;
     }
 }
 export class Cube extends Object3d {
-    constructor(scale, pos, fillStyle) {
+    constructor(scale, pos, wireframe, fillStyle) {
         super([
             new Vec3(-0.5 * scale.x, -0.5 * scale.y, -0.5 * scale.z),
             new Vec3(0.5 * scale.x, -0.5 * scale.y, -0.5 * scale.z),
@@ -57,9 +58,10 @@ export class Cube extends Object3d {
             0, 4, 5,
             2, 3, 7,
             2, 6, 7
-        ], pos, new Vec3(0, 0, 0), fillStyle);
+        ], pos, new Vec3(0, 0, 0), wireframe, fillStyle);
         this.scale = scale;
         this.pos = pos;
+        this.wireframe = wireframe;
         this.fillStyle = fillStyle;
     }
 }
@@ -85,11 +87,12 @@ export class World {
     }
 }
 export class Plane extends Object3d {
-    constructor(resolution, scale, pos, fillStyle) {
-        super([], [], pos, new Vec3(0, 0, 0), fillStyle);
+    constructor(resolution, scale, pos, wireframe, fillStyle) {
+        super([], [], pos, new Vec3(0, 0, 0), wireframe, fillStyle);
         this.resolution = resolution;
         this.scale = scale;
         this.pos = pos;
+        this.wireframe = wireframe;
         this.fillStyle = fillStyle;
         for (var z = 0; z <= resolution.z; z++) {
             for (var x = 0; x <= resolution.x; x++) {
@@ -110,9 +113,10 @@ export class Plane extends Object3d {
     }
 }
 export class Torus extends Object3d {
-    constructor(pos, fillStyle, mainRadius, ringRadius, resolution) {
-        super([], [], pos, new Vec3(0, 0, 0), fillStyle);
+    constructor(pos, wireframe, fillStyle, mainRadius, ringRadius, resolution) {
+        super([], [], pos, new Vec3(0, 0, 0), wireframe, fillStyle);
         this.pos = pos;
+        this.wireframe = wireframe;
         this.fillStyle = fillStyle;
         this.mainRadius = mainRadius;
         this.ringRadius = ringRadius;
