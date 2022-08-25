@@ -23,3 +23,25 @@ export class Vec3{
         return a.add(b.add(a.mul(-1)).mul(alpha));
     }
 }
+export class Triangle{
+    public avgZ: number;
+    constructor(
+        public vert0: Vec3,
+        public vert1: Vec3,
+        public vert2: Vec3,
+        public wireframe: boolean,
+        public fillStyle: string
+    ){
+        this.avgZ = (vert0.z + vert1.z + vert2.z) / 3;
+    }
+}
+
+export class Triangle2{
+    constructor(
+        public vert0: Vec3,
+        public vert1: Vec3,
+        public vert2: Vec3,
+        public wireframe: boolean,
+        public fillStyle: string
+    ){}
+}
