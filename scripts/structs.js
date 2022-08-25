@@ -40,5 +40,6 @@ export class Triangle2 {
         this.vert2 = vert2;
         this.wireframe = wireframe;
         this.fillStyle = fillStyle;
+        this.avgZ = (vert0.z + vert1.z + vert2.z) / 3;
     }
 }

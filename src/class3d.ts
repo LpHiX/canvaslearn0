@@ -36,46 +36,18 @@ export abstract class Object3d{
         }
         return buffer;
     }
-    projectVerticies(fromView: Viewport, toView: Viewport, divide: boolean, clip: boolean): Triangle[]{
-        var buffer: Triangle[] = [];
-        for(var i = 0; i < this.triangles.length / 3; i++){
-            const corner0 = fromView.canonVertex(this.verticies[this.triangles[i* 3    ]], this.eulerRot, this.pos, toView, divide, clip);
-            const corner1 = fromView.canonVertex(this.verticies[this.triangles[i* 3 + 1]], this.eulerRot, this.pos, toView, divide, clip);
-            const corner2 = fromView.canonVertex(this.verticies[this.triangles[i* 3 + 2]], this.eulerRot, this.pos, toView, divide, clip);
-            if(corner0 !== null && corner1 !== null && corner2 !== null){
-                buffer.push(new Triangle(corner0, corner1, corner2, this.wireframe, this.fillStyle));
-            }
-        }
-        return buffer;
-    }
 }
 export class World{
     objects: Object3d[];
     constructor(){
         this.objects = [];
     }
-    loadBuffer(viewport: Viewport):Triangle[]{
-        var buffer:Triangle[] = [];
-        this.objects.forEach(object =>{
-            if(object !== viewport.camera.cameraModel){
-                buffer = buffer.concat(object.getTriangles(viewport));
-            }
-        })
-        return buffer;
-    }
-    load3dBuffer(viewport: Viewport):Triangle2[]{
+    load3dBuffer(excludedObjects: Object3d[]):Triangle2[]{
         var buffer:Triangle2[] = [];
         this.objects.forEach(object =>{
-            if(object !== viewport.camera.cameraModel){
+            if(!excludedObjects.includes(object)){
                 buffer = buffer.concat(object.getTriangles2());
             }
-        })
-        return buffer;
-    }
-    loadCanonBuffer(fromView: Viewport, toView: Viewport, divide: boolean, clip: boolean):Triangle[]{
-        var buffer:Triangle[] = [];
-        this.objects.forEach(object =>{
-            buffer = buffer.concat(object.projectVerticies(fromView, toView, divide, clip));
         })
         return buffer;
     }

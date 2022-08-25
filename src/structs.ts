@@ -37,11 +37,14 @@ export class Triangle{
 }
 
 export class Triangle2{
+    public avgZ: number;
     constructor(
         public vert0: Vec3,
         public vert1: Vec3,
         public vert2: Vec3,
         public wireframe: boolean,
         public fillStyle: string
-    ){}
+    ){
+        this.avgZ = (vert0.z + vert1.z + vert2.z) / 3;
+    }
 }
