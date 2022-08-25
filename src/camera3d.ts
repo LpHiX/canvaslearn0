@@ -1,14 +1,14 @@
 import {World} from "./class3d.js";
 import {Cube, Frustum, Plane, Torus} from "./shapes.js";
 import {Camera, Viewport} from "./camera.js";
-import {Vec3, Vec2, Triangle} from "./structs.js";
+import {Vec3, Triangle} from "./structs.js";
 import { Controls } from "./controls.js";
 import {rotX, rotY, rotZ} from "./utils.js";
 
 const canvas0 = document.getElementById("canvas0") as HTMLCanvasElement;
 const canvas1 = document.getElementById("canvas1") as HTMLCanvasElement;
+const fpsMeter = document.getElementById("fpsMeter") as HTMLImageElement;
 const debugText = document.getElementById("debugText") as HTMLDivElement;
-
 
 const cube = new Cube(new Vec3(1, 1, 1), new Vec3( 2, 3, 5), false, "rgb(0, 255, 255)");
 const cube2 = new Cube(new Vec3(2, 3, 2), new Vec3( -3, 1, 4), false, "rgb(0, 255, 0)");
@@ -17,10 +17,10 @@ const cam0debug = new Cube(new Vec3(2, 2, 1), new Vec3(0, 0, 0), true, "rgb(255,
 const torus = new Torus(new Vec3( 2, 3, 5), true, "rgb(0, 0, 255)", 3, 0.5, new Vec3(12, 20, 0));
 const cam0cube = new Cube(new Vec3(0.5, 0.5, 0.5), new Vec3( 1, 2, 1), false, "rgb(255, 255 ,255)");
 const cam1cube = new Cube(new Vec3(0.5, 0.5, 0.5), new Vec3( 1, 2, 1), false, "rgb(255, 255 ,255)");
-const cam0 = new Camera(new Vec3(0,0,0), new Vec3(0, 0, 0), cam0cube, 1, 10);
-const cam1 = new Camera(new Vec3(-10,0,0), new Vec3(0, -Math.PI / 2, 0), cam1cube, 1, 10);
-const viewport0 = new Viewport(canvas0, cam0, 1);
-const viewport1 = new Viewport(canvas1, cam1, 1);
+const cam0 = new Camera(new Vec3(0,0,0), new Vec3(0, 0, 0), cam0cube, 1, 10, 1, 1);
+const cam1 = new Camera(new Vec3(-10,0,0), new Vec3(0, -Math.PI / 2, 0), cam1cube, 1, 10, 1, 1);
+const viewport0 = new Viewport(canvas0, cam0);
+const viewport1 = new Viewport(canvas1, cam1);
 const cam0frust = new Frustum(new Vec3(1, 1, 1), new Vec3(1, 1, 1), viewport0, true, "rgb(255, 255, 255)");
 const controls = new Controls(canvas0, canvas1, cam0, cam1)
 const world0 = new World()
@@ -49,7 +49,7 @@ function frameUpdate(timestamp:number){
     cam1cube.pos = cam1.pos;
 
     debugText.innerText = cam0.eulerRot.x.toString();
-
+    fpsMeter.innerText = (performance.now() - timestamp).toString();
     window.requestAnimationFrame(frameUpdate);
 }
 controls.setup();

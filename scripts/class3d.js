@@ -9,19 +9,7 @@ export class Object3d {
         this.wireframe = wireframe;
         this.fillStyle = fillStyle;
     }
-    getTriangles(viewport) {
-        var buffer = [];
-        for (var i = 0; i < this.triangles.length / 3; i++) {
-            const corner0 = viewport.vecToCanvas(rotYXZ(this.eulerRot, this.verticies[this.triangles[i * 3]]).add(this.pos), true, true);
-            const corner1 = viewport.vecToCanvas(rotYXZ(this.eulerRot, this.verticies[this.triangles[i * 3 + 1]]).add(this.pos), true, true);
-            const corner2 = viewport.vecToCanvas(rotYXZ(this.eulerRot, this.verticies[this.triangles[i * 3 + 2]]).add(this.pos), true, true);
-            if (corner0 !== null && corner1 !== null && corner2 !== null) {
-                buffer.push(new Triangle(corner0, corner1, corner2, this.wireframe, this.fillStyle));
-            }
-        }
-        return buffer;
-    }
-    getTriangles2() {
+    getTriangles() {
         var buffer = [];
         for (var i = 0; i < this.triangles.length / 3; i++) {
             const corner0 = rotYXZ(this.eulerRot, this.verticies[this.triangles[i * 3]]).add(this.pos);
@@ -40,7 +28,7 @@ export class World {
         var buffer = [];
         this.objects.forEach(object => {
             if (!excludedObjects.includes(object)) {
-                buffer = buffer.concat(object.getTriangles2());
+                buffer = buffer.concat(object.getTriangles());
             }
         });
         return buffer;

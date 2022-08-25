@@ -1,6 +1,5 @@
 import {rotX, rotY, rotZ, rotYXZ} from "./utils.js";
-import {Vec3, Triangle, Triangle2} from "./structs.js";
-import { Viewport } from "./camera.js";
+import {Vec3, Triangle} from "./structs.js";
 
 export abstract class Object3d{
     constructor(
@@ -12,21 +11,8 @@ export abstract class Object3d{
         public fillStyle: string
     ){
     }
-    getTriangles(viewport: Viewport): Triangle[]{
+    getTriangles(): Triangle[]{
         var buffer: Triangle[] = [];
-    
-        for(var i = 0; i < this.triangles.length / 3; i++){
-            const corner0 = viewport.vecToCanvas(rotYXZ(this.eulerRot, this.verticies[this.triangles[i* 3    ]]).add(this.pos), true, true);
-            const corner1 = viewport.vecToCanvas(rotYXZ(this.eulerRot, this.verticies[this.triangles[i* 3 + 1]]).add(this.pos), true, true);
-            const corner2 = viewport.vecToCanvas(rotYXZ(this.eulerRot, this.verticies[this.triangles[i* 3 + 2]]).add(this.pos), true, true);
-            if(corner0 !== null && corner1 !== null && corner2 !== null){
-                buffer.push(new Triangle(corner0, corner1, corner2, this.wireframe, this.fillStyle));
-            }
-        }
-        return buffer;
-    }
-    getTriangles2(): Triangle2[]{
-        var buffer: Triangle2[] = [];
     
         for(var i = 0; i < this.triangles.length / 3; i++){
             const corner0 = rotYXZ(this.eulerRot, this.verticies[this.triangles[i* 3    ]]).add(this.pos);
@@ -42,11 +28,11 @@ export class World{
     constructor(){
         this.objects = [];
     }
-    load3dBuffer(excludedObjects: Object3d[]):Triangle2[]{
-        var buffer:Triangle2[] = [];
+    load3dBuffer(excludedObjects: Object3d[]):Triangle[]{
+        var buffer:Triangle[] = [];
         this.objects.forEach(object =>{
             if(!excludedObjects.includes(object)){
-                buffer = buffer.concat(object.getTriangles2());
+                buffer = buffer.concat(object.getTriangles());
             }
         })
         return buffer;

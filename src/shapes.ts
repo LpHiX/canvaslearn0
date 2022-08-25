@@ -76,14 +76,14 @@ export class Frustum extends Object3d{
     ){
         super(
             [ //Verticies
-                new Vec3(-viewport.camera.near * viewport.size, -viewport.camera.near * viewport.size, viewport.camera.near),
-                new Vec3( viewport.camera.near * viewport.size, -viewport.camera.near * viewport.size, viewport.camera.near),
-                new Vec3(-viewport.camera.near * viewport.size,  viewport.camera.near * viewport.size, viewport.camera.near),
-                new Vec3( viewport.camera.near * viewport.size,  viewport.camera.near * viewport.size, viewport.camera.near),
-                new Vec3(-viewport.camera.far  * viewport.size, -viewport.camera.far * viewport.size, viewport.camera.far),
-                new Vec3( viewport.camera.far  * viewport.size, -viewport.camera.far * viewport.size, viewport.camera.far),
-                new Vec3(-viewport.camera.far  * viewport.size,  viewport.camera.far * viewport.size, viewport.camera.far),
-                new Vec3( viewport.camera.far  * viewport.size,  viewport.camera.far * viewport.size, viewport.camera.far)
+                new Vec3(-viewport.camera.near * viewport.camera.xScale, -viewport.camera.near * viewport.camera.yScale, viewport.camera.near),
+                new Vec3( viewport.camera.near * viewport.camera.xScale, -viewport.camera.near * viewport.camera.yScale, viewport.camera.near),
+                new Vec3(-viewport.camera.near * viewport.camera.xScale,  viewport.camera.near * viewport.camera.yScale, viewport.camera.near),
+                new Vec3( viewport.camera.near * viewport.camera.xScale,  viewport.camera.near * viewport.camera.yScale, viewport.camera.near),
+                new Vec3(-viewport.camera.far  * viewport.camera.xScale, -viewport.camera.far *  viewport.camera.yScale, viewport.camera.far),
+                new Vec3( viewport.camera.far  * viewport.camera.xScale, -viewport.camera.far *  viewport.camera.yScale, viewport.camera.far),
+                new Vec3(-viewport.camera.far  * viewport.camera.xScale,  viewport.camera.far *  viewport.camera.yScale, viewport.camera.far),
+                new Vec3( viewport.camera.far  * viewport.camera.xScale,  viewport.camera.far *  viewport.camera.yScale, viewport.camera.far)
             ], [ //Triangles
                 0,1,3,
                 0,2,3,
