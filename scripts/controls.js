@@ -151,28 +151,28 @@ export class Controls {
     }
     updateUser() {
         if (this.wPressed) {
-            this.cam0.pos = this.cam0.pos.add(rotY(this.cam0.eulerRot.y, new Vec3(0, 0, 0.1)));
+            this.cam0.pos = this.cam0.pos.add(rotY(this.cam0.eulerRot.y, new Vec3(0, 0, 0.05)));
         }
         if (this.aPressed) {
-            this.cam0.pos = this.cam0.pos.add(rotY(this.cam0.eulerRot.y, new Vec3(-0.1, 0, 0)));
+            this.cam0.pos = this.cam0.pos.add(rotY(this.cam0.eulerRot.y, new Vec3(-0.05, 0, 0)));
         }
         if (this.sPressed) {
-            this.cam0.pos = this.cam0.pos.add(rotY(this.cam0.eulerRot.y, new Vec3(0, 0, -0.1)));
+            this.cam0.pos = this.cam0.pos.add(rotY(this.cam0.eulerRot.y, new Vec3(0, 0, -0.05)));
         }
         if (this.dPressed) {
-            this.cam0.pos = this.cam0.pos.add(rotY(this.cam0.eulerRot.y, new Vec3(0.1, 0, 0)));
+            this.cam0.pos = this.cam0.pos.add(rotY(this.cam0.eulerRot.y, new Vec3(0.05, 0, 0)));
         }
         if (this.iPressed) {
-            this.cam1.pos = this.cam1.pos.add(rotY(this.cam1.eulerRot.y, new Vec3(0, 0, 0.1)));
+            this.cam1.pos = this.cam1.pos.add(rotY(this.cam1.eulerRot.y, new Vec3(0, 0, 0.05)));
         }
         if (this.jPressed) {
-            this.cam1.pos = this.cam1.pos.add(rotY(this.cam1.eulerRot.y, new Vec3(-0.1, 0, 0)));
+            this.cam1.pos = this.cam1.pos.add(rotY(this.cam1.eulerRot.y, new Vec3(-0.05, 0, 0)));
         }
         if (this.kPressed) {
-            this.cam1.pos = this.cam1.pos.add(rotY(this.cam1.eulerRot.y, new Vec3(0, 0, -0.1)));
+            this.cam1.pos = this.cam1.pos.add(rotY(this.cam1.eulerRot.y, new Vec3(0, 0, -0.05)));
         }
         if (this.lPressed) {
-            this.cam1.pos = this.cam1.pos.add(rotY(this.cam1.eulerRot.y, new Vec3(0.1, 0, 0)));
+            this.cam1.pos = this.cam1.pos.add(rotY(this.cam1.eulerRot.y, new Vec3(0.05, 0, 0)));
         }
         if (this.cam0.pos.y > 0) {
             this.yVel -= 1;

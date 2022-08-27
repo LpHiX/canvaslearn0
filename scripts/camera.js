@@ -48,42 +48,64 @@ export class Viewport {
             return null;
         }
     }
+    vecToCanvasSafe(vertex) {
+        const vertRotated = rotZXY(this.camera.eulerRot.mul(-1), vertex.add(this.camera.pos.mul(-1)));
+        return this.g2c(new Vec3(vertRotated.x / (vertRotated.z), vertRotated.y / (vertRotated.z), (vertRotated.z /*- this.camera.near) / (this.camera.far - this.camera.near*/)));
+    }
+    triangleToCanvas(triangle) {
+        return new Triangle(this.g2c(new Vec3(triangle.vert0.x / triangle.vert0.z, triangle.vert0.y / triangle.vert0.z, triangle.vert0.z)), this.g2c(new Vec3(triangle.vert1.x / triangle.vert1.z, triangle.vert1.y / triangle.vert1.z, triangle.vert1.z)), this.g2c(new Vec3(triangle.vert2.x / triangle.vert2.z, triangle.vert2.y / triangle.vert2.z, triangle.vert2.z)), triangle.wireframe, triangle.fillStyle);
+    }
+    triangleToCam(triangle) {
+        return new Triangle(rotZXY(this.camera.eulerRot.mul(-1), triangle.vert0.add(this.camera.pos.mul(-1))), rotZXY(this.camera.eulerRot.mul(-1), triangle.vert1.add(this.camera.pos.mul(-1))), rotZXY(this.camera.eulerRot.mul(-1), triangle.vert2.add(this.camera.pos.mul(-1))), triangle.wireframe, triangle.fillStyle);
+    }
     drawWorld(world, excludedObjects) {
-        var buffer = world.load3dBuffer(excludedObjects);
-        for (var i = 0; i < buffer.length; i++) {
-            const vert0 = buffer[i].vert0;
-            const vert1 = buffer[i].vert1;
-            const vert2 = buffer[i].vert2;
-            var vert0distances = [];
-            var vert1distances = [];
-            var vert2distances = [];
-            for (var i = 0; i < 5; i++) {
-                vert0distances.push(this.camera.sides[i].signedDistance(vert0));
-                vert1distances.push(this.camera.sides[i].signedDistance(vert1));
-                vert2distances.push(this.camera.sides[i].signedDistance(vert2));
-            }
-            if (vert0distances[0] > 0) {
-                if (vert1distances[0] > 0) {
-                    if (vert0distances[0] > 0) {
+        var bufferWorld = world.load3dBuffer(excludedObjects);
+        bufferWorld.push(new Triangle(new Vec3(-2.5, 1, 2), new Vec3(-3.5, 2, 3), new Vec3(-2, 1, 4), false, "rgb(255,255,255)"));
+        var buffer3D = [];
+        for (let bufferIndex = 0; bufferIndex < bufferWorld.length; bufferIndex++) {
+            buffer3D.push(this.triangleToCam(bufferWorld[bufferIndex]));
+        }
+        var bufferClipped3D = [];
+        for (var bufferIndex = 0; bufferIndex < buffer3D.length; bufferIndex++) {
+            var workingBuffer = [buffer3D[bufferIndex]];
+            for (let side = 0; side < 5; side++) {
+                var clippedBuffer = [];
+                for (let preTriIndex = 0; preTriIndex < workingBuffer.length; preTriIndex++) {
+                    const verts = [workingBuffer[preTriIndex].vert0, workingBuffer[preTriIndex].vert1, workingBuffer[preTriIndex].vert2];
+                    var vertDistances = [this.camera.sides[side].signedDistance(verts[0]), this.camera.sides[side].signedDistance(verts[1]), this.camera.sides[side].signedDistance(verts[2])];
+                    var clipCase = 0;
+                    for (var vertexIndex = 0; vertexIndex < 3; vertexIndex++) {
+                        clipCase += vertDistances[vertexIndex] > 0 ? 0 : 1;
                     }
-                    else {
-                        // 0, 0, 1
+                    switch (clipCase) {
+                        case 0:
+                            clippedBuffer.push(new Triangle(verts[0], verts[1], verts[2], buffer3D[bufferIndex].wireframe, buffer3D[bufferIndex].fillStyle));
+                            break;
+                        case 1:
+                            var indicies = [0, 1, 2].sort((a, b) => vertDistances[a] - vertDistances[b]);
+                            var clippedVert0 = Vec3.lerp(-vertDistances[indicies[0]] / (vertDistances[indicies[1]] - vertDistances[indicies[0]]), verts[indicies[0]], verts[indicies[1]]);
+                            var clippedVert1 = Vec3.lerp(-vertDistances[indicies[0]] / (vertDistances[indicies[2]] - vertDistances[indicies[0]]), verts[indicies[0]], verts[indicies[2]]);
+                            clippedBuffer.push(new Triangle(clippedVert0, verts[indicies[1]], verts[indicies[2]], buffer3D[bufferIndex].wireframe, buffer3D[bufferIndex].fillStyle));
+                            clippedBuffer.push(new Triangle(clippedVert0, clippedVert1, verts[indicies[2]], buffer3D[bufferIndex].wireframe, buffer3D[bufferIndex].fillStyle));
+                            break;
+                        case 2:
+                            var indicies = [0, 1, 2].sort((a, b) => vertDistances[a] - vertDistances[b]);
+                            var clippedVert0 = Vec3.lerp(-vertDistances[indicies[0]] / (vertDistances[indicies[2]] - vertDistances[indicies[0]]), verts[indicies[0]], verts[indicies[2]]);
+                            var clippedVert1 = Vec3.lerp(-vertDistances[indicies[1]] / (vertDistances[indicies[2]] - vertDistances[indicies[1]]), verts[indicies[1]], verts[indicies[2]]);
+                            clippedBuffer.push(new Triangle(clippedVert0, clippedVert1, verts[indicies[2]], buffer3D[bufferIndex].wireframe, buffer3D[bufferIndex].fillStyle));
+                            break;
+                        default:
+                            break;
                     }
                 }
-                else {
-                    if (vert2distances[0] > 0) {
-                    }
-                    else {
-                        // 0, 1, 1
-                    }
-                }
+                //console.log(clippedBuffer);
+                workingBuffer = clippedBuffer;
             }
-            const corner0 = this.vecToCanvas(buffer[i].vert0, true);
-            const corner1 = this.vecToCanvas(buffer[i].vert1, true);
-            const corner2 = this.vecToCanvas(buffer[i].vert2, true);
-            if (corner0 !== null && corner1 !== null && corner2 !== null) {
-                buffer[i] = new Triangle(corner0, corner1, corner2, buffer[i].wireframe, buffer[i].fillStyle);
-            }
+            bufferClipped3D = bufferClipped3D.concat(workingBuffer);
+        }
+        var buffer = [];
+        for (let i = 0; i < bufferClipped3D.length; i++) {
+            buffer.push(this.triangleToCanvas(bufferClipped3D[i]));
         }
         buffer = buffer.sort((a, b) => (a.avgZ < b.avgZ) ? 1 : -1);
         buffer.forEach(triangle => {

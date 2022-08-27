@@ -13,6 +13,9 @@ export class Vec3 {
     static lerp(alpha, a, b) {
         return a.add(b.add(a.mul(-1)).mul(alpha));
     }
+    toString() {
+        return "Vec3(" + this.x + ", " + this.y + ", " + this.z + ")";
+    }
 }
 export class Side {
     constructor(x, y, z, w) {
