@@ -15,3 +15,6 @@ export function rotYXZ(angles: Vec3, coord:Vec3):Vec3{
 export function rotZXY(angles: Vec3, coord:Vec3):Vec3{
     return rotZ(angles.z, rotX(angles.x, rotY(angles.y, coord)));
 }
+export function lerpVec(a: Vec3, b: Vec3, alpha: number): Vec3{
+    return(a.add(b.add(a.mul(-1).mul(alpha))));
+}

@@ -1,5 +1,5 @@
 import { World, Object3d} from "./class3d";
-import {rotX, rotY, rotZ, rotYXZ, rotZXY} from "./utils.js";
+import {rotX, rotY, rotZ, rotYXZ, rotZXY, lerpVec} from "./utils.js";
 import {Side, Triangle, Vec3} from "./structs.js";
 
 
@@ -56,34 +56,44 @@ export class Viewport{
             return null;
         }
     }
+    triangleToCanvas(triangle: Triangle): Triangle{
+        return new Triangle(
+            this.vecToCanvas(triangle.vert0, true),
+            this.vecToCanvas(triangle.vert1, true),
+            this.vecToCanvas(triangle.vert2, true),
+            triangle.wireframe,
+            triangle.fillStyle
+        )
+    }
     drawWorld(world: World, excludedObjects: Object3d[]):void{
         var buffer = world.load3dBuffer(excludedObjects);
         for(var i = 0; i < buffer.length; i++){
-            const vert0 = buffer[i].vert0;
-            const vert1 = buffer[i].vert1;
-            const vert2 = buffer[i].vert2;
-            var vert0distances = []
-            var vert1distances = []
-            var vert2distances = []
+            const verts = [buffer[i].vert0, buffer[i].vert1, buffer[i].vert2]
+            var vertDistances: number[][] = []
             for(var i = 0; i < 5; i++){
-                vert0distances.push(this.camera.sides[i].signedDistance(vert0))
-                vert1distances.push(this.camera.sides[i].signedDistance(vert1))
-                vert2distances.push(this.camera.sides[i].signedDistance(vert2))
+                var distances = []
+                distances.push(this.camera.sides[i].signedDistance(verts[0]))
+                distances.push(this.camera.sides[i].signedDistance(verts[1]))
+                distances.push(this.camera.sides[i].signedDistance(verts[2]))
+                vertDistances.push(distances);
             }
-            if(vert0distances[0] > 0){
-                if(vert1distances[0] > 0){
-                    if(vert0distances[0] > 0){
-
-                    } else{
-                        // 0, 0, 1
-                    }
-                } else{
-                    if(vert2distances[0] > 0){
-
-                    } else{
-                        // 0, 1, 1
-                    }
-                }
+            // LEFT SIDE
+            var clipCase = 0;
+            for(var i = 0; i < 2; i++){
+                clipCase += vertDistances[0][i] > 0 ? 1 : 0;
+            }
+            switch (clipCase) {
+                case 0:
+                    break;
+                case 1:
+                    const indicies = [0, 1, 2].sort((a, b) => vertDistances[0][a] - vertDistances[0][b]);
+                    const clippedVert0 = lerpVec(verts[indicies[0]], verts[indicies[1]], - vertDistances[0][indicies[0]] / (vertDistances[0][indicies[1]] - vertDistances[0][indicies[0]]))
+                    const clippedVert1 = lerpVec(verts[indicies[0]], verts[indicies[2]], - vertDistances[0][indicies[0]] / (vertDistances[0][indicies[2]] - vertDistances[0][indicies[0]]))                    
+                    break;
+                case 2:
+                    break;
+                default:
+                    break;
             }
             const corner0 = this.vecToCanvas(buffer[i].vert0, true);
             const corner1 = this.vecToCanvas(buffer[i].vert1, true);
