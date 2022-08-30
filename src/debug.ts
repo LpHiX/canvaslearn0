@@ -18,7 +18,10 @@ var cont = test.getContext("2d") as CanvasRenderingContext2D;
 cont.drawImage(testImg, 0, 0);
 const testImageData = cont.getImageData(0, 0, testImg.naturalWidth, testImg.naturalHeight);
 
-class Vec2{
+function lerp(alpha: number, a: number, b: number): number{
+    return a + (b-a) * alpha;
+}
+/*class Vec2{
     constructor(
         public x: number,
         public y: number
@@ -168,5 +171,150 @@ function main(): void {
     textureTriangle(new Vec2(50, 800), new Vec2(700, 950), new Vec2(950, 50), true, testImageData);
     textureTriangle(tVec0, tVec1, tVec2, false, testImageData);
     context.putImageData(imageData, 0, 0,);
+}
+main();
+*/
+class Vec3{
+    constructor(
+        public x: number,
+        public y: number,
+        public z: number
+    ){}
+    toString(){
+        return `Vec3(${this.x}, ${this.y}, ${this.z})`;
+    }
+    add(vec: Vec3){
+        return new Vec3(this.x + vec.x, this.y + vec.y, this.z + vec.z);
+    }
+    mul(scalar: number){
+        return new Vec3(this.x * scalar, this.y * scalar, this.z * scalar);
+    }
+    static lerp(alpha:number, a:Vec3, b:Vec3):Vec3{
+        return a.add(b.add(a.mul(-1)).mul(alpha));
+    }
+}
+class Grid{
+    constructor(
+        public size: number
+    ){}
+    canvasX(vec: Vec3):number{
+        return (1 + vec.x / this.size) * canvas.width / 2;
+    }
+    canvasY(vec: Vec3):number{
+        return (1 - vec.y / this.size) * canvas.height / 2;
+    }
+    canvasVec(vec: Vec3):Vec3{
+        return new Vec3(this.canvasX(vec), this.canvasY(vec), vec.z);
+    }
+}
+function changePixel(vec: Vec3, color: Vec3){
+    const index = (vec.y * canvas.width + vec.x) * 4
+    data[index] = color.x;
+    data[index + 1] = color.y;
+    data[index + 2] = color.z;
+    data[index + 3] = 255;
+}
+const grid = new Grid(1);
+// Takes verts in form u/z, v/z, 1/z
+function getAB(x0: number, y0: number, vert0: Vec3, vert1: Vec3, vert2: Vec3, down: boolean){
+    // vert0 - vert1 = a
+    // vert1 - vert2 = b
+    // inverse matrix to find a and b in terms of x and y
+    vert0 = grid.canvasVec(vert0);
+    vert1 = grid.canvasVec(vert1);
+    vert2 = grid.canvasVec(vert2);
+
+    const determinant = (vert1.x - vert0.x) * (vert2.y - vert1.y) - (vert2.x - vert1.x) * (vert1.y - vert0.y);
+    const x = x0 - vert0.x;
+    const y = y0 - vert0.y;
+    if(down){
+        return new Vec3(
+            1 / determinant * (x * (vert2.y - vert1.y) + y * (vert1.x - vert2.x)),
+            1 - 1/ determinant * (x * (vert0.y - vert1.y) + y * (vert1.x - vert0.x)), 0
+        );
+    } else{
+        return new Vec3(
+            1 / determinant * (x * (vert0.y - vert1.y) + y * (vert1.x - vert0.x)),
+            1 - 1/ determinant * (x * (vert2.y - vert1.y) + y * (vert1.x - vert2.x)), 0
+        );
+    }
+}
+// Takes verts in form u/z, v/z, 1/z
+function getColor(uv: Vec3, down: boolean, texture: ImageData): Vec3{
+
+    const index = (Math.round(uv.y  / 1 * texture.height) * texture.width + Math.round(uv.x / 1 * texture.width)) * 4;
+    return new Vec3(texture.data[index], texture.data[index + 1], texture.data[index + 2]);
+}
+function drawTriangle(vert0: Vec3, vert1: Vec3, vert2: Vec3, down: boolean, texture: ImageData){
+    vert0 = new Vec3(vert0.x / vert0.z, vert0.y / vert0.z, 1 / vert0.z);
+    vert1 = new Vec3(vert1.x / vert1.z, vert1.y / vert1.z, 1 / vert1.z);
+    vert2 = new Vec3(vert2.x / vert2.z, vert2.y / vert2.z, 1 / vert2.z);
+    const uv0 = new Vec3(1, 0, 1).mul(1);
+    const uv1 = new Vec3(0, 1, 1).mul(1);
+    const uv2 = new Vec3(1, 1, 1).mul(1);
+    var rawVerts = [vert0, vert1, vert2].sort((a, b) => b.y - a.y);
+    var verts = [grid.canvasVec(rawVerts[0]), grid.canvasVec(rawVerts[1]), grid.canvasVec(rawVerts[2])]
+    const dLine0 = verts[2].add(verts[0].mul(-1))
+    const dLine1 = verts[1].add(verts[0].mul(-1))
+    const dLine2 = verts[2].add(verts[1].mul(-1))
+    const dUV0 = uv2.add(uv0.mul(-1));
+    const dUV1 = uv1.add(uv0.mul(-1));
+    const dUV2 = uv2.add(uv1.mul(-1));
+    var delta0 = 0.5;
+    var delta1 = 0.5;
+    var delta2 = 0.5;
+    console.log(verts)
+    for(let y = Math.round(verts[0].y); y < Math.round(verts[1].y); y++){
+        let xValues = [Math.round(verts[0].x) + Math.floor(delta0), Math.round(verts[0].x) + Math.floor(delta1)];
+        let lineUV = [Vec3.lerp((y - verts[0].y) / (verts[2].y - verts[0].y), uv0, uv1), Vec3.lerp((y - verts[0].y) / (verts[1].y - verts[0].y), uv0, uv2)]
+        if(xValues[0] > xValues[1]){
+            xValues = [xValues[1], xValues[0]];
+            lineUV = [lineUV[1], lineUV[0]];
+        }
+        for(let x = xValues[0]; x <= xValues[1]; x++){
+            const uv = Vec3.lerp((x - xValues[0])/(xValues[1] - xValues[0]), lineUV[0], lineUV[1]);
+            changePixel(new Vec3(x, y, 0), getColor(uv, down, testImageData));
+        }
+        delta0 += dLine0.x / dLine0.y
+        delta1 += dLine1.x / dLine1.y
+    }
+    for(let y = Math.round(verts[1].y); y < Math.round(verts[2].y); y++){
+        let xValues = [Math.round(verts[0].x) + Math.floor(delta0), Math.round(verts[1].x) + Math.floor(delta2)];
+        let lineUV = [Vec3.lerp((y - verts[0].y) / (verts[2].y - verts[0].y), uv0, uv2), Vec3.lerp((y - verts[1].y) / (verts[2].y - verts[1].y), uv1, uv2)]
+        if(xValues[0] > xValues[1]){
+            xValues = [xValues[1], xValues[0]];
+            lineUV = [lineUV[1], lineUV[0]];
+        }
+        for(let x = xValues[0]; x <= xValues[1]; x++){
+            const uv = Vec3.lerp((x - xValues[0])/(xValues[1] - xValues[0]), lineUV[0], lineUV[1]);
+            changePixel(new Vec3(x, y, 0), getColor(uv, down, testImageData));
+        }
+        delta0 += dLine0.x / dLine0.y
+        delta2 += dLine2.x / dLine2.y
+    }
+}
+function divZ(vec:Vec3):Vec3{
+    return new Vec3(vec.x / vec.z, vec.y / vec.z, 1 / vec.z);
+}
+function main(){
+    const tVec0 = new Vec3(-10, -10, 25)
+    const tVec1 = new Vec3(10, -10, 15)
+    const tVec2 = new Vec3(10, 10, 12)
+    canvas.addEventListener("mousedown", event =>{
+        const ab = getAB(event.clientX - rect.left, event.clientY - rect.top, divZ(tVec0), divZ(tVec1), divZ(tVec2), true);
+        const u = Vec3.lerp(ab.x, new Vec3(0, 0, divZ(tVec0).z), new Vec3(1 * divZ(tVec1).z, 0, divZ(tVec1).z));
+        const v = Vec3.lerp(ab.y, new Vec3(0, 0, divZ(tVec1).z), new Vec3(0, 1 * divZ(tVec2).z, divZ(tVec2).z));
+        const index = (Math.round(u.x / u.z * testImageData.height) * testImageData.width   + Math.round(v.y / v.z * testImageData.width)) * 4;
+        const color = new Vec3(testImageData.data[index], testImageData.data[index + 1], testImageData.data[index + 2]);
+        debugText.innerText = 
+        `AB = ${ab.toString()}
+        UV div= (${u.x}, ${v.y})
+        UV = (${u.x / u.z}, ${v.y / v.z})
+        tex = (${Math.round(u.x / u.z * testImageData.height) }, ${Math.round(v.y / v.z * testImageData.width) }
+        color = ${color.toString()}`
+    })
+    drawTriangle(tVec0, tVec1, tVec2, true, testImageData);
+    //drawTriangle(tVec0, new Vec3(0, 10, 30), tVec2, false, testImageData);
+    context.putImageData(imageData, 0, 0);
 }
 main();
