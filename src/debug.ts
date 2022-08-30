@@ -24,7 +24,17 @@ class Vec2{
         public y: number
     ){}
     toString(){
-        return `Vec2(x: ${this.x}, y: ${this.y})`;
+        return `Vec2(${this.x},${this.y})`;
+    }
+}
+class Vec3{
+    constructor(
+        public x: number,
+        public y: number,
+        public z: number
+    ){}
+    toString(){
+        return `Vec2(${this.x},${this.y}, ${this.z})`;
     }
 }
 

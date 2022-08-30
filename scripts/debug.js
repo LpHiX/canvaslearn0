@@ -21,7 +21,17 @@ class Vec2 {
         this.y = y;
     }
     toString() {
-        return `Vec2(x: ${this.x}, y: ${this.y})`;
+        return `Vec2(${this.x},${this.y})`;
+    }
+}
+class Vec3 {
+    constructor(x, y, z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+    toString() {
+        return `Vec2(${this.x},${this.y}, ${this.z})`;
     }
 }
 const tVec0 = new Vec2(50, 800);
