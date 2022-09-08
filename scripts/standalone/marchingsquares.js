@@ -24,6 +24,8 @@ var marchingsquares;
         []
     ];
     class Vec2 {
+        x;
+        y;
         constructor(x, y) {
             this.x = x;
             this.y = y;
@@ -42,6 +44,9 @@ var marchingsquares;
         }
     }
     class Circle {
+        pos;
+        vel;
+        radius;
         constructor(pos, vel, radius) {
             this.pos = pos;
             this.vel = vel;
@@ -64,6 +69,10 @@ var marchingsquares;
         }
     }
     class Grid {
+        size;
+        canvasMin;
+        xLim;
+        yLim;
         constructor(size) {
             this.size = size;
             this.canvasMin = Math.min(canvas.width, canvas.height);
@@ -146,6 +155,7 @@ var marchingsquares;
         return a.add(b.add(a.mul(-1)).mul(alpha));
     }
     class SubGrid {
+        gridSize;
         constructor(gridSize) {
             this.gridSize = gridSize;
         }

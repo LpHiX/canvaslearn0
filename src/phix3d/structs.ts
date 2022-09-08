@@ -37,7 +37,7 @@ export class Triangle{
         public vert0: Vertex,
         public vert1: Vertex,
         public vert2: Vertex,
-        public texture: Uint8ClampedArray
+        public texture: number
     ){}
 }
 export class Matrix33{

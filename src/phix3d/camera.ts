@@ -1,5 +1,5 @@
 import { World } from "./scene3d";
-import { Vec3 } from "./structs.js";
+import { Matrix33, Vec3 } from "./structs.js";
 
 export class FrustPlane{
     constructor(
@@ -41,6 +41,9 @@ export class Viewport{
         this.ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
     }
     drawWorld(world: World){
-        this.ctx.createImageData(10, 10).data
+        world.objects.forEach(object => {
+            const objectToWorldMatrix = Matrix33.RotYXZScale(object.scale, object.eulerRot);
+            const worldToCamera = Matrix33.rotZ(this.camera.eulerRot.z * -1).multiply(Matrix33.rotX(this.camera.eulerRot.x * -1).multiply(Matrix33.rotY(this.camera.eulerRot.y * -1)))
+        });
     }
 }

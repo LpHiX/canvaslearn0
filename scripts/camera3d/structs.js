@@ -1,4 +1,7 @@
 export class Vec3 {
+    x;
+    y;
+    z;
     constructor(x, y, z) {
         this.x = x;
         this.y = y;
@@ -18,6 +21,10 @@ export class Vec3 {
     }
 }
 export class Side {
+    x;
+    y;
+    z;
+    w;
     constructor(x, y, z, w) {
         this.x = x;
         this.y = y;
@@ -29,6 +36,12 @@ export class Side {
     }
 }
 export class Triangle {
+    vert0;
+    vert1;
+    vert2;
+    wireframe;
+    fillStyle;
+    avgZ;
     constructor(vert0, vert1, vert2, wireframe, fillStyle) {
         this.vert0 = vert0;
         this.vert1 = vert1;

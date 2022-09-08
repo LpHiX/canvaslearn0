@@ -1,4 +1,9 @@
 export class Object3D {
+    pos;
+    eulerRot;
+    scale;
+    verticies;
+    triIndex;
     constructor(pos, eulerRot, scale, verticies, triIndex) {
         this.pos = pos;
         this.eulerRot = eulerRot;
@@ -8,6 +13,7 @@ export class Object3D {
     }
 }
 export class World {
+    objects;
     constructor(objects) {
         this.objects = objects;
     }
