@@ -9,15 +9,15 @@ export class Object3D{
         public eulerRot: Vec3,
         public texture: Uint8ClampedArray
     ){}
-    getTriangles(){
-        const objectMatrix = Matrix33.RotYXZScale(this.scale, this.eulerRot);
+    getObjectTriangles(){
+        var objectTriangles = [];
         for(let i = 0; i < this.triIndex.length / 3; i++){
-            new Triangle(
-                this.verticies[i * 3].transform(objectMatrix),
-                this.verticies[i * 3 + 1].transform(objectMatrix),
-                this.verticies[i * 3 + 2].transform(objectMatrix),
+            objectTriangles.push(new Triangle(
+                this.verticies[i * 3],
+                this.verticies[i * 3 + 1],
+                this.verticies[i * 3 + 2],
                 this.texture
-            );
+            ));
         }
     }
 }
