@@ -7,7 +7,7 @@ export class Object3D{
         public pos: Vec3,
         public scale: Vec3,
         public eulerRot: Vec3,
-        public texture: Uint8ClampedArray
+        public textureID: number
     ){}
     getObjectTriangles(){
         var objectTriangles = [];

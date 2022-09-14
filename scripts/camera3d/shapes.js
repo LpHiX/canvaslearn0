@@ -2,6 +2,11 @@ import { rotY } from "./utils.js";
 import { Vec3 } from "./structs.js";
 import { Object3d } from "./class3d.js";
 export class Plane extends Object3d {
+    resolution;
+    scale;
+    pos;
+    wireframe;
+    fillStyle;
     constructor(resolution, scale, pos, wireframe, fillStyle) {
         super([], [], pos, new Vec3(0, 0, 0), wireframe, fillStyle);
         this.resolution = resolution;
@@ -28,6 +33,10 @@ export class Plane extends Object3d {
     }
 }
 export class Cube extends Object3d {
+    scale;
+    pos;
+    wireframe;
+    fillStyle;
     constructor(scale, pos, wireframe, fillStyle) {
         super([
             new Vec3(-0.5 * scale.x, -0.5 * scale.y, -0.5 * scale.z),
@@ -59,6 +68,11 @@ export class Cube extends Object3d {
     }
 }
 export class Frustum extends Object3d {
+    scale;
+    pos;
+    viewport;
+    wireframe;
+    fillStyle;
     constructor(scale, pos, viewport, wireframe, fillStyle) {
         super([
             new Vec3(-viewport.camera.near * viewport.camera.xScale, -viewport.camera.near * viewport.camera.yScale, viewport.camera.near),
@@ -91,6 +105,12 @@ export class Frustum extends Object3d {
     }
 }
 export class Torus extends Object3d {
+    pos;
+    wireframe;
+    fillStyle;
+    mainRadius;
+    ringRadius;
+    resolution;
     constructor(pos, wireframe, fillStyle, mainRadius, ringRadius, resolution) {
         super([], [], pos, new Vec3(0, 0, 0), wireframe, fillStyle);
         this.pos = pos;

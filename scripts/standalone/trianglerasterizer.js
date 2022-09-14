@@ -16,6 +16,9 @@ var cont = test.getContext("2d");
 cont.drawImage(testImg, 0, 0);
 const testImageData = cont.getImageData(0, 0, testImg.naturalWidth, testImg.naturalHeight);
 class Vec3 {
+    x;
+    y;
+    z;
     constructor(x, y, z) {
         this.x = x;
         this.y = y;
@@ -35,12 +38,15 @@ class Vec3 {
     }
 }
 class Vertex {
+    pos;
+    uv;
     constructor(pos, uv) {
         this.pos = pos;
         this.uv = uv;
     }
 }
 class Grid {
+    size;
     constructor(size) {
         this.size = size;
     }

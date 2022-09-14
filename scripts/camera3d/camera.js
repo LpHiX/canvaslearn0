@@ -1,6 +1,14 @@
 import { rotZXY } from "./utils.js";
 import { Side, Triangle, Vec3 } from "./structs.js";
 export class Camera {
+    pos;
+    eulerRot;
+    cameraModel;
+    near;
+    far;
+    xScale;
+    yScale;
+    sides;
     constructor(pos, eulerRot, cameraModel, near, far, xScale, yScale) {
         this.pos = pos;
         this.eulerRot = eulerRot;
@@ -25,6 +33,10 @@ export class Camera {
     }
 }
 export class Viewport {
+    canvas;
+    camera;
+    canvasMin;
+    ctx;
     constructor(canvas, camera) {
         this.canvas = canvas;
         this.camera = camera;

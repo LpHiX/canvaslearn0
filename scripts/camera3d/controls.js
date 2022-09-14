@@ -1,6 +1,26 @@
 import { Vec3 } from "./structs.js";
 import { rotY } from "./utils.js";
 export class Controls {
+    canvas0;
+    canvas1;
+    cam0;
+    cam1;
+    forward;
+    down;
+    startX;
+    startY;
+    premoveY;
+    premoveX;
+    wPressed;
+    aPressed;
+    sPressed;
+    dPressed;
+    spacePressed;
+    iPressed;
+    jPressed;
+    kPressed;
+    lPressed;
+    yVel;
     constructor(canvas0, canvas1, cam0, cam1) {
         this.canvas0 = canvas0;
         this.canvas1 = canvas1;

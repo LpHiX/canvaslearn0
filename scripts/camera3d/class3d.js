@@ -1,6 +1,12 @@
 import { rotYXZ } from "./utils.js";
 import { Triangle } from "./structs.js";
 export class Object3d {
+    verticies;
+    triangles;
+    pos;
+    eulerRot;
+    wireframe;
+    fillStyle;
     constructor(verticies, triangles, pos, eulerRot, wireframe, fillStyle) {
         this.verticies = verticies;
         this.triangles = triangles;
@@ -21,6 +27,7 @@ export class Object3d {
     }
 }
 export class World {
+    objects;
     constructor() {
         this.objects = [];
     }

@@ -5,6 +5,8 @@ var perlin;
     const ctx = canvas.getContext("2d");
     const debugText = document.getElementById("debugText");
     class Vec2 {
+        x;
+        y;
         constructor(x, y) {
             this.x = x;
             this.y = y;
@@ -26,10 +28,12 @@ var perlin;
         return a + (b - a) * (w * w * w * ((6 * w - 15) * w + 10));
     }
     class PerlinLayer {
+        size;
+        magnitude;
+        corners = [];
         constructor(size, magnitude) {
             this.size = size;
             this.magnitude = magnitude;
-            this.corners = [];
             for (var x = 0; x <= size; x++) {
                 this.corners.push([]);
                 for (var y = 0; y <= size; y++) {
