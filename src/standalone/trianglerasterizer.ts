@@ -1,4 +1,4 @@
-
+namespace trianglerasterizer{
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 const context = canvas.getContext("2d") as CanvasRenderingContext2D;
 const rect = canvas.getBoundingClientRect();
@@ -127,4 +127,4 @@ function main(){
     //drawTriangle(tVec0, new Vec3(0, 10, 30), tVec2, false, testImageData);
     context.putImageData(imageData, 0, 0);
 }
-main();
+main();}

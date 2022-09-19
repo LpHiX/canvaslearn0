@@ -1,4 +1,5 @@
 import { Matrix33, Vec3 } from "./structs.js";
+import { Rasterizer } from "./rasterizer.js";
 export class FrustPlane {
     normal;
     distance;
@@ -38,16 +39,34 @@ export class Camera {
 export class Viewport {
     canvas;
     camera;
+    texMan;
     ctx;
-    constructor(canvas, camera) {
+    rasterizer;
+    constructor(canvas, camera, texMan) {
         this.canvas = canvas;
         this.camera = camera;
+        this.texMan = texMan;
         this.ctx = canvas.getContext("2d");
+        this.rasterizer = new Rasterizer(canvas, texMan);
     }
     drawWorld(world) {
+        var viewTriBuffer = [];
+        const worldToViewMat = (Matrix33.rotZ(this.camera.eulerRot.z * -1).multiply(Matrix33.rotX(this.camera.eulerRot.x * -1).multiply(Matrix33.rotY(this.camera.eulerRot.y * -1))));
         world.objects.forEach(object => {
-            const objectToWorldMatrix = Matrix33.RotYXZScale(object.scale, object.eulerRot);
-            const worldToCamera = Matrix33.rotZ(this.camera.eulerRot.z * -1).multiply(Matrix33.rotX(this.camera.eulerRot.x * -1).multiply(Matrix33.rotY(this.camera.eulerRot.y * -1)));
+            const triangles = object.getObjectTriangles();
+            triangles.forEach(triangle => {
+                viewTriBuffer.push(worldToViewMat.transformTri(triangle));
+            });
         });
+        var clippedTriBuffer = [];
+        viewTriBuffer.forEach(triangle => {
+            clippedTriBuffer.push(triangle);
+        });
+        var screenTriBuffer = [];
+        clippedTriBuffer.forEach(triangle => {
+            screenTriBuffer.push(triangle);
+        });
+        screenTriBuffer.sort((a, b) => b.averageZ - a.averageZ);
+        this.rasterizer.drawAllTriangles(screenTriBuffer);
     }
 }

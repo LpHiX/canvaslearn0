@@ -1,14 +1,22 @@
+import { Texture } from "./textureloader.js";
+
 export class Vec3{
     constructor(
         public x: number,
         public y: number,
-        public z: number,
+        public z: number
     ){}
+    toString(): string{
+        return `Vec3(${this.x}, ${this.y}, ${this.z})`
+    }
     add(other: Vec3):Vec3{
         return new Vec3(this.x + other.x, this.y + other.y, this.z + other.z);
     }
     mul(scalar: number): Vec3{
         return new Vec3(this.x * scalar, this.y * scalar, this.z * scalar);
+    }
+    static lerp(alpha:number, a:Vec3, b:Vec3):Vec3{
+        return a.add(b.add(a.mul(-1)).mul(alpha));
     }
 }
 export class Vertex{
@@ -33,12 +41,40 @@ export class Vertex{
     }
 }
 export class Triangle{
+    public averageZ: number
     constructor(
         public vert0: Vertex,
         public vert1: Vertex,
         public vert2: Vertex,
-        public texture: number
-    ){}
+        public texture: Texture
+    ){
+        this.averageZ = (vert0.pos.z + vert1.pos.z + vert2.pos.z)/3
+    }
+    addPos(other: Vec3): Triangle{
+        return new Triangle(
+            Vertex.fromVec(this.vert0.pos.add(other), this.vert0.uv),
+            Vertex.fromVec(this.vert1.pos.add(other), this.vert1.uv),
+            Vertex.fromVec(this.vert2.pos.add(other), this.vert2.uv),
+            this.texture
+        )
+    }
+    project(): Triangle{
+        return new Triangle(
+            Vertex.fromVec(new Vec3(this.vert0.pos.x / this.vert0.pos.z, this.vert0.pos.x / this.vert0.pos.z, this.vert0.pos.z), this.vert0.uv),
+            Vertex.fromVec(new Vec3(this.vert1.pos.x / this.vert1.pos.z, this.vert1.pos.x / this.vert1.pos.z, this.vert1.pos.z), this.vert1.uv),
+            Vertex.fromVec(new Vec3(this.vert2.pos.x / this.vert2.pos.z, this.vert2.pos.x / this.vert2.pos.z, this.vert2.pos.z), this.vert2.uv),
+            this.texture
+        );
+    }
+    toScreen(width: number, height: number, sizeX: number, sizeY: number): Triangle{
+        const canvasMin = Math.min(width, height);
+        return new Triangle(
+            Vertex.fromVec(new Vec3(width / 2 + this.vert0.pos.x / sizeX * canvasMin / 2, height / 2 - this.vert0.pos.y / sizeY * canvasMin / 2, this.vert0.pos.z), this.vert0.uv),
+            Vertex.fromVec(new Vec3(width / 2 + this.vert1.pos.x / sizeX * canvasMin / 2, height / 2 - this.vert1.pos.y / sizeY * canvasMin / 2, this.vert1.pos.z), this.vert1.uv),
+            Vertex.fromVec(new Vec3(width / 2 + this.vert2.pos.x / sizeX * canvasMin / 2, height / 2 - this.vert2.pos.y / sizeY * canvasMin / 2, this.vert2.pos.z), this.vert2.uv),
+            this.texture
+        )
+    }
 }
 export class Matrix33{
     constructor(
@@ -75,6 +111,14 @@ export class Matrix33{
             other.x * this.values[0][0] + other.y * this.values[0][1] + other.z * this.values[0][2],
             other.x * this.values[1][0] + other.y * this.values[1][1] + other.z * this.values[1][2],
             other.x * this.values[2][0] + other.y * this.values[2][1] + other.z * this.values[2][2],
+        )
+    }
+    transformTri(other: Triangle): Triangle{
+        return new Triangle(
+            Vertex.fromVec(this.transform(other.vert0.pos), other.vert0.uv),
+            Vertex.fromVec(this.transform(other.vert1.pos), other.vert1.uv),
+            Vertex.fromVec(this.transform(other.vert2.pos), other.vert2.uv),
+            other.texture
         )
     }
     static rotX(angle:number): Matrix33{

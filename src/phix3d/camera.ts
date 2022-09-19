@@ -1,5 +1,7 @@
-import { World } from "./scene3d";
-import { Matrix33, Vec3 } from "./structs.js";
+import { World } from "./world.js";
+import { Matrix33, Triangle, Vec3, Vertex } from "./structs.js";
+import { Rasterizer } from "./rasterizer.js";
+import { TextureManager } from "./textureloader.js";
 
 export class FrustPlane{
     constructor(
@@ -34,16 +36,40 @@ export class Camera{
 }
 export class Viewport{
     ctx: CanvasRenderingContext2D;
+    rasterizer: Rasterizer;
     constructor(
         public canvas: HTMLCanvasElement,
         public camera: Camera,
+        public texMan: TextureManager
     ){
         this.ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+        this.rasterizer = new Rasterizer(canvas, texMan);
     }
     drawWorld(world: World){
+        var viewTriBuffer: Triangle[] = [];
+        const worldToViewMat = (
+            Matrix33.rotZ(this.camera.eulerRot.z * -1).multiply(
+                Matrix33.rotX(this.camera.eulerRot.x * -1).multiply(
+                    Matrix33.rotY(this.camera.eulerRot.y * -1))));
         world.objects.forEach(object => {
-            const objectToWorldMatrix = Matrix33.RotYXZScale(object.scale, object.eulerRot);
-            const worldToCamera = Matrix33.rotZ(this.camera.eulerRot.z * -1).multiply(Matrix33.rotX(this.camera.eulerRot.x * -1).multiply(Matrix33.rotY(this.camera.eulerRot.y * -1)))
+            const triangles = object.getObjectTriangles();
+            triangles.forEach(triangle => {                
+                viewTriBuffer.push(worldToViewMat.transformTri(triangle))
+            })
         });
+
+        var clippedTriBuffer: Triangle[] = [];
+        viewTriBuffer.forEach(triangle => {
+            clippedTriBuffer.push(triangle)
+        });
+
+        var screenTriBuffer: Triangle[] = [];
+        clippedTriBuffer.forEach(triangle => {
+            screenTriBuffer.push(triangle);
+        })
+        screenTriBuffer.sort((a, b) => b.averageZ - a.averageZ);
+
+        this.rasterizer.drawAllTriangles(screenTriBuffer)
+
     }
 }
